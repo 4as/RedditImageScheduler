@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedditImageScheduler", "RedditImageScheduler\RedditImageScheduler.csproj", "{6B1918DE-E830-4CD2-B36E-B9015B8EEAA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedditImageScheduler.Gtk", "RedditImageScheduler.Gtk\RedditImageScheduler.Gtk.csproj", "{584AA0A2-90F3-4933-BAFA-CACC1B4615B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedditImageScheduler.Mac", "RedditImageScheduler.Mac\RedditImageScheduler.Mac.csproj", "{FFEEA10B-7BFE-4146-A639-91EB84C837B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedditImageScheduler.WinForms", "RedditImageScheduler.WinForms\RedditImageScheduler.WinForms.csproj", "{9B53B376-3E33-425B-8F1A-0D9418251E23}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedditImageScheduler.Wpf", "RedditImageScheduler.Wpf\RedditImageScheduler.Wpf.csproj", "{866F4A0F-25EA-478D-AC89-580473EFBCAB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6B1918DE-E830-4CD2-B36E-B9015B8EEAA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B1918DE-E830-4CD2-B36E-B9015B8EEAA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B1918DE-E830-4CD2-B36E-B9015B8EEAA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B1918DE-E830-4CD2-B36E-B9015B8EEAA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{584AA0A2-90F3-4933-BAFA-CACC1B4615B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{584AA0A2-90F3-4933-BAFA-CACC1B4615B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{584AA0A2-90F3-4933-BAFA-CACC1B4615B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{584AA0A2-90F3-4933-BAFA-CACC1B4615B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFEEA10B-7BFE-4146-A639-91EB84C837B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFEEA10B-7BFE-4146-A639-91EB84C837B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFEEA10B-7BFE-4146-A639-91EB84C837B4}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{FFEEA10B-7BFE-4146-A639-91EB84C837B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFEEA10B-7BFE-4146-A639-91EB84C837B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFEEA10B-7BFE-4146-A639-91EB84C837B4}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{9B53B376-3E33-425B-8F1A-0D9418251E23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B53B376-3E33-425B-8F1A-0D9418251E23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B53B376-3E33-425B-8F1A-0D9418251E23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B53B376-3E33-425B-8F1A-0D9418251E23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{866F4A0F-25EA-478D-AC89-580473EFBCAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{866F4A0F-25EA-478D-AC89-580473EFBCAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{866F4A0F-25EA-478D-AC89-580473EFBCAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{866F4A0F-25EA-478D-AC89-580473EFBCAB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
