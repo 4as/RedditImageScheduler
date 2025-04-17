@@ -1,14 +1,11 @@
 ﻿using System;
 using Eto.Forms;
 
-namespace RedditImageScheduler.Gtk
-{
-	class Program
-	{
+namespace RedditImageScheduler.Gtk {
+	class Program {
 		[STAThread]
-		public static void Main(string[] args)
-		{
-			new Application(Eto.Platforms.Gtk).Run(new MainForm());
+		public static void Main(string[] args) {
+			new RedditApplication(Eto.Platforms.Gtk).Run();
 		}
 	}
 }

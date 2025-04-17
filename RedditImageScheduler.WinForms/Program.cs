@@ -1,14 +1,13 @@
 ﻿using System;
+using System.ComponentModel;
 using Eto.Forms;
+using RedditImageScheduler.UI;
 
-namespace RedditImageScheduler.WinForms
-{
-	class Program
-	{
+namespace RedditImageScheduler.WinForms {
+	class Program {
 		[STAThread]
-		public static void Main(string[] args)
-		{
-			new Application(Eto.Platforms.WinForms).Run(new MainForm());
+		public static void Main(string[] args) {
+			new RedditApplication(Eto.Platforms.WinForms).Run();
 		}
 	}
 }

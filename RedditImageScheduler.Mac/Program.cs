@@ -1,14 +1,11 @@
 ﻿using System;
 using Eto.Forms;
 
-namespace RedditImageScheduler.Mac
-{
-	class Program
-	{
+namespace RedditImageScheduler.Mac {
+	class Program {
 		[STAThread]
-		public static void Main(string[] args)
-		{
-			new Application(Eto.Platforms.Mac64).Run(new MainForm());
+		public static void Main(string[] args) {
+			new RedditApplication(Eto.Platforms.Mac64).Run();
 		}
 	}
 }
