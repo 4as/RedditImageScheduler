@@ -5,7 +5,7 @@ namespace RedditImageScheduler.Mac {
 	class Program {
 		[STAThread]
 		public static void Main(string[] args) {
-			new RedditApplication(Eto.Platforms.Mac64).Run();
+			new ReddApplication(Eto.Platforms.Mac64).Run();
 		}
 	}
 }

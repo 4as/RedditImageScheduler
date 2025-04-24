@@ -3,14 +3,14 @@ using System.Diagnostics;
 using Eto.Forms;
 
 namespace RedditImageScheduler.UI {
-	public class RedditUIMenu {
+	public class ReddUIMenu {
 
 		private readonly MenuBar menuBar;
 		private readonly Command commandHome;
 		private readonly Command commandAbout;
 		private readonly Command commandQuit;
 		
-		public RedditUIMenu() {
+		public ReddUIMenu() {
 			commandHome = new Command { MenuText = "&Home", Shortcut = Application.Instance.CommonModifier | Keys.H };
 			commandAbout = new Command { MenuText = "&About", Shortcut = Application.Instance.CommonModifier | Keys.A };
 			commandQuit = new Command { MenuText = "&Quit", Shortcut = Application.Instance.CommonModifier | Keys.Q };
@@ -40,11 +40,6 @@ namespace RedditImageScheduler.UI {
 			commandAbout.Executed -= OnAbout;
 		}
 
-		public void Dispose() {
-			Deinitialize();
-			menuBar.Dispose();
-		}
-
 		// ===============================================
 		// EVENTS
 		
@@ -56,7 +51,7 @@ namespace RedditImageScheduler.UI {
 		
 		protected void OnAbout(object sender, EventArgs e) {
 			//TODO: replace with custom dedicated About dialog
-			new AboutDialog().ShowDialog(RedditMain.Instance);
+			new AboutDialog().ShowDialog(ReddMain.Instance);
 		}
 		
 		protected void OnQuit(object sender, EventArgs e) {

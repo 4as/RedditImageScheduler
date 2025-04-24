@@ -7,7 +7,7 @@ namespace RedditImageScheduler.WinForms {
 	class Program {
 		[STAThread]
 		public static void Main(string[] args) {
-			new RedditApplication(Eto.Platforms.WinForms).Run();
+			new ReddApplication(Eto.Platforms.WinForms).Run();
 		}
 	}
 }

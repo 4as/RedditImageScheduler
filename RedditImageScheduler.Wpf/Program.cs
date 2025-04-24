@@ -5,7 +5,7 @@ namespace RedditImageScheduler.Wpf {
 	class Program {
 		[STAThread]
 		public static void Main(string[] args) {
-			new RedditApplication(Eto.Platforms.Wpf).Run();
+			new ReddApplication(Eto.Platforms.Wpf).Run();
 		}
 	}
 }
