@@ -1,21 +1,32 @@
-using RedditImageScheduler.IO;
+using System.Text;
+using Eto.Drawing;
+using SQLite;
 
 namespace RedditImageScheduler.Data {
-	public readonly struct ReddDataEntry {
-		public readonly string SourceURL;
-		public readonly string Title;
-		public readonly byte[] Image;
+	[Table(nameof(ReddDataEntry))]
+	public class ReddDataEntry {
+		[PrimaryKey, AutoIncrement]
+		[Column(nameof(Id))]
+		public int Id { get; set; }
 
-		public ReddDataEntry(ReddIODatabase.Entry ioEntry) {
-			SourceURL = ioEntry.Source;
-			Title = ioEntry.Title;
-			Image = ioEntry.Image;
-		}
+		[Column(nameof(Timestamp))]
+		public uint Timestamp { get; set; }
 
-		public ReddDataEntry(string sourceUrl, string title, byte[] image) {
-			SourceURL = sourceUrl;
-			Title = title;
-			Image = image;
+		[Column(nameof(Title))]
+		public string Title { get; set; }
+
+		[Column(nameof(Source))]
+		public string Source { get; set; }
+
+		[Column(nameof(Image))]
+		public byte[] Image { get; set; }
+
+		private readonly StringBuilder sBuilder = new StringBuilder();
+		public override string ToString() {
+			sBuilder.Clear();
+			sBuilder.Append(Title);
+			sBuilder.Append(" (URL: ").Append(Source).Append(')');
+			return sBuilder.ToString();
 		}
 	}
 }

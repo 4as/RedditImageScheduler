@@ -12,12 +12,14 @@ namespace RedditImageScheduler {
 
 		private readonly ReddIODatabase ioDatabase;
 		private readonly ReddUIMenu uiMenu = new ReddUIMenu();
-		private readonly ReddUIContent uiContent = new ReddUIContent();
+		private readonly ReddUIContent uiContent;
 		
 		public ReddMain(ReddIODatabase database) {
 			ioDatabase = database;
 			
-			Title = "Reddit Image Scheduler";
+			uiContent = new ReddUIContent(ioDatabase.Entries);
+			
+			Title = ReddLanguage.NAME;
 			MinimumSize = new Size(ReddConfig.WIDTH, ReddConfig.HEIGHT);
 
 			Content = uiContent.UI;
@@ -28,7 +30,7 @@ namespace RedditImageScheduler {
 			base.OnShown(e);
 			INSTANCE = this;
 			uiMenu.Initialize();
-			uiContent.Initialize(ioDatabase.Entries);
+			uiContent.Initialize();
 		}
 
 		protected override void OnClosing(CancelEventArgs e) {

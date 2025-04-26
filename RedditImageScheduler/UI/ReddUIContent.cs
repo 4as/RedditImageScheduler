@@ -1,39 +1,86 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Data;
 
 namespace RedditImageScheduler.UI {
 	public class ReddUIContent {
-		private readonly TableLayout etoLayout;
-		private readonly ListBox etoList;
+		private readonly ReddUIContentEntry uiEntry = new ReddUIContentEntry();
+		private readonly ReddUIContentEdit uiEdit = new ReddUIContentEdit();
 		
-		private ReddDataEntries dataEntries;
+		private readonly DynamicLayout etoLayout = new DynamicLayout();
+		private readonly ListBox etoList = new ListBox();
 		
-		public ReddUIContent() {
-			etoList = new ListBox();
+		private readonly ReddDataEntries dataEntries;
+		
+		public ReddUIContent(ReddDataEntries entries) {
+			dataEntries = entries;
+			
 			etoList.Size = new Size(ReddConfig.WIDTH/2, ReddConfig.HEIGHT);
 			
-			etoLayout = new TableLayout();
-			etoLayout.Spacing = new Size(5, 5);
-			etoLayout.Padding = new Padding(4);
-			etoLayout.Size = new Size(ReddConfig.WIDTH, ReddConfig.HEIGHT);
-			etoLayout.Rows.Add(new TableRow(etoList));
+			etoLayout.Padding = new Padding(2);
+			etoLayout.Spacing = new Size(2, 2);
+			etoLayout.BeginHorizontal();
+			etoLayout.Add(etoList);
+			etoLayout.Add(uiEntry.UI);
+			etoLayout.EndHorizontal();
+			etoLayout.BeginHorizontal();
+			etoLayout.Add(uiEdit.UI);
+			etoLayout.EndHorizontal();
 		}
 
-		public TableLayout UI => etoLayout;
+		public Container UI => etoLayout;
 
-		public void Initialize(ReddDataEntries entries) {
-			etoList.Items.Clear();
+		public void Initialize() {
+			Deinitialize();
+			
+			uiEdit.OnAdd += OnAdd;
+			uiEdit.OnRemove += OnRemove;
+			uiEdit.Initialize();
 
-			dataEntries = entries;
-			for( int i = 0, iLen = dataEntries.Count; i < iLen; i++ ) {
-				ReddDataEntry entry = dataEntries[i];
-				etoList.Items.Add(entry.Title);
-			}
+			etoList.SelectedIndexChanged += OnSelect;
+			
+			dataEntries.OnUpdate += OnUpdate;
+			OnUpdate();
 		}
 
 		public void Deinitialize() {
-			etoList.Items.Clear();
+			uiEdit.OnAdd -= OnAdd;
+			uiEdit.OnRemove -= OnRemove;
+			uiEdit.Deinitialize();
+			
+			dataEntries.OnUpdate -= OnUpdate;
+		}
+		
+		private void OnUpdate() {
+			etoList.DataStore = dataEntries;
+			if( uiEntry.Data != null ) {
+				int idx = dataEntries.IndexOf(uiEntry.Data);
+				etoList.SelectedIndex = idx;
+			}
+
+			uiEdit.AllowRemove = uiEntry.Data != null;
+		}
+		
+		private void OnSelect(object sender, EventArgs e) {
+			int idx = etoList.SelectedIndex;
+			if( idx < 0 || idx >= dataEntries.Count ) {
+				uiEntry.Unset();
+				return;
+			}
+			
+			var entry = dataEntries[idx];
+			uiEntry.Set(entry);
+		}
+		
+		private void OnAdd() {
+			dataEntries.Add("", "", 0, null);
+		}
+
+		private void OnRemove() {
+			
 		}
 	}
 }

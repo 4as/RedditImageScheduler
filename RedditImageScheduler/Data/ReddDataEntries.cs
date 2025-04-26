@@ -1,39 +1,68 @@
 using System.Collections;
 using System.Collections.Generic;
+using Eto.Drawing;
 using RedditImageScheduler.IO;
 
 namespace RedditImageScheduler.Data {
-	public readonly struct ReddDataEntries : IReadOnlyList<ReddDataEntry> {
-		private readonly ReddIODatabase ioDatabase;
-		private readonly List<ReddIODatabase.Entry> listEntries;
-		
-		public ReddDataEntries(ReddIODatabase database) {
-			ioDatabase = database;
-			listEntries = ioDatabase.GetAll();
+	public class ReddDataEntries : IReadOnlyList<ReddDataEntry> {
+		private readonly ReddIOEntries ioEntries;
+		private readonly List<ReddDataEntry> listEntries;
+		public ReddDataEntries(ReddIOEntries entries) {
+			ioEntries = entries;
+			listEntries = entries.GetAll();
 		}
 		
 		public int Count => listEntries.Count;
 		
-		public ReddDataEntry this[int index] => new ReddDataEntry(listEntries[index]);
-		public ReddDataEntry this[uint index] => new ReddDataEntry(listEntries[(int)index]);
+		public ReddDataEntry this[int index] => listEntries[index];
+		public ReddDataEntry this[uint index] => listEntries[(int)index];
+		
+		public ReddDataEntry Add(string title, string source, uint timestamp, byte[] image) {
+			ReddDataEntry raw = new ReddDataEntry();
+			raw.Title = title;
+			raw.Source = source;
+			raw.Image = image;
+			raw.Timestamp = timestamp;
+			listEntries.Add(raw);
+			ioEntries.Insert(raw);
+			return raw;
+		}
 
-		public void Add(ReddDataEntry entry) {
-			int id = ioDatabase.Add(entry.Title, entry.SourceURL, entry.Image);
-			if( id != 0 ) {
-				listEntries.Add(ioDatabase.Get(id));
+		public void Update(ReddDataEntry entry) {
+			int idx = listEntries.IndexOf(entry);
+			if( idx == -1 ) {
+				listEntries.Add(entry);
+				ioEntries.Insert(entry);
 			}
+			else {
+				ioEntries.Update(entry);
+			}
+		}
+
+		public void Remove(ReddDataEntry entry) {
+			int idx = listEntries.IndexOf(entry);
+			if( idx == -1 ) return;
+			
+			listEntries.RemoveAt(idx);
+		}
+
+		public int IndexOf(ReddDataEntry entry) {
+			return listEntries.IndexOf(entry);
+		}
+
+		public IEnumerator<ReddDataEntry> GetEnumerator() => listEntries.GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator() => listEntries.GetEnumerator();
+
+		// ===============================================
+		// EVENTS
+		public event ReddIOEntries.IOEntriesEvent OnUpdate {
+			add => ioEntries.OnUpdate += value;
+			remove => ioEntries.OnUpdate -= value;
 		}
 		
-		public IEnumerator<ReddDataEntry> GetEnumerator() {
-			foreach( var entry in listEntries ) {
-				yield return new ReddDataEntry(entry);
-			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator() {
-			foreach( var entry in listEntries ) {
-				yield return new ReddDataEntry(entry);
-			}
+		public event ReddIOEntries.IOEntriesEvent OnError {
+			add => ioEntries.OnError += value;
+			remove => ioEntries.OnError -= value;
 		}
 	}
 }

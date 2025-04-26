@@ -25,26 +25,36 @@ namespace RedditImageScheduler {
 			base.OnInitialized(e);
 			
 			ioDatabase.OnErrorInitialize += OnDatabaseErrorInitialize;
-			ioDatabase.OnErrorAdd += OnDatabaseErrorAdd;
+			ioDatabase.OnErrorChange += OnDatabaseErrorChange;
 			ioDatabase.Open();
 			
 			reddTray.OnOpen += OnOpen;
 			reddTray.Initialize();
 			
 			isRunning = true;
+#if DEBUG
+			OnOpen();
+#endif
 		}
 
 		protected override void OnTerminating(CancelEventArgs e) {
+#if DEBUG
+			if( !isRunning ) return;
+			isRunning = false;
+#else
 			if( isRunning ) return;
+#endif
 			
 			ioDatabase.OnErrorInitialize -= OnDatabaseErrorInitialize;
-			ioDatabase.OnErrorAdd -= OnDatabaseErrorAdd;
+			ioDatabase.OnErrorChange -= OnDatabaseErrorChange;
 			ioDatabase.Close();
 			
 			reddTray.OnOpen -= OnOpen;
 			reddTray.Dispose();
 			
 			base.OnTerminating(e);
+
+			Quit();
 		}
 
 		private void OnOpen() {
@@ -69,8 +79,8 @@ namespace RedditImageScheduler {
 			MessageBox.Show("Failed to access '" + ioDatabase.FilePath + ".' Make sure the current folder can be read from and written to.", MessageBoxType.Error); 
 		}
 		
-		private void OnDatabaseErrorAdd() {
-			MessageBox.Show("Failed to add an entry to the database. Is '"+ioDatabase.FilePath+"' still accessible?", MessageBoxType.Error); 
+		private void OnDatabaseErrorChange() {
+			MessageBox.Show("Failed to modify the database. Is '"+ioDatabase.FilePath+"' still accessible?", MessageBoxType.Error); 
 		}
 	}
 }
