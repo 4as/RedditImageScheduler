@@ -1,6 +1,6 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Eto.Drawing;
 using RedditImageScheduler.IO;
 
 namespace RedditImageScheduler.Data {
@@ -16,13 +16,18 @@ namespace RedditImageScheduler.Data {
 		
 		public ReddDataEntry this[int index] => listEntries[index];
 		public ReddDataEntry this[uint index] => listEntries[(int)index];
+
+		public ReddDataEntry Create() {
+			ReddDataEntry entry = Add(string.Empty, string.Empty, DateTime.Now.AddHours(8), null);
+			return entry;
+		}
 		
-		public ReddDataEntry Add(string title, string source, uint timestamp, byte[] image) {
+		public ReddDataEntry Add(string title, string source, DateTime date, byte[] image) {
 			ReddDataEntry raw = new ReddDataEntry();
 			raw.Title = title;
 			raw.Source = source;
 			raw.Image = image;
-			raw.Timestamp = timestamp;
+			raw.SetDate(date);
 			listEntries.Add(raw);
 			ioEntries.Insert(raw);
 			return raw;
@@ -44,6 +49,8 @@ namespace RedditImageScheduler.Data {
 			if( idx == -1 ) return;
 			
 			listEntries.RemoveAt(idx);
+			
+			ioEntries.Remove(entry);
 		}
 
 		public int IndexOf(ReddDataEntry entry) {

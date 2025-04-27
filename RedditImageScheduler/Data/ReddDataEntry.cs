@@ -1,5 +1,5 @@
+using System;
 using System.Text;
-using Eto.Drawing;
 using SQLite;
 
 namespace RedditImageScheduler.Data {
@@ -10,7 +10,7 @@ namespace RedditImageScheduler.Data {
 		public int Id { get; set; }
 
 		[Column(nameof(Timestamp))]
-		public uint Timestamp { get; set; }
+		public long Timestamp { get; set; }
 
 		[Column(nameof(Title))]
 		public string Title { get; set; }
@@ -21,11 +21,20 @@ namespace RedditImageScheduler.Data {
 		[Column(nameof(Image))]
 		public byte[] Image { get; set; }
 
+		public void SetDate(DateTime date) {
+			Timestamp = new DateTimeOffset(date).ToUnixTimeSeconds();
+		}
+
+		public DateTime GetDate() {
+			DateTimeOffset current = DateTimeOffset.FromUnixTimeSeconds(Timestamp);
+			return current.UtcDateTime;
+		}
+
 		private readonly StringBuilder sBuilder = new StringBuilder();
 		public override string ToString() {
 			sBuilder.Clear();
-			sBuilder.Append(Title);
-			sBuilder.Append(" (URL: ").Append(Source).Append(')');
+			sBuilder.Append('"').Append(Title).Append('"');
+			sBuilder.Append(" : ").Append(Source);
 			return sBuilder.ToString();
 		}
 	}

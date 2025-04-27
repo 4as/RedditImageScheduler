@@ -3,9 +3,7 @@ using System.Diagnostics;
 using Eto.Forms;
 
 namespace RedditImageScheduler.UI {
-	public class ReddUIMenu {
-
-		private readonly MenuBar menuBar;
+	public class ReddUIMenu : MenuBar{
 		private readonly Command commandHome;
 		private readonly Command commandAbout;
 		private readonly Command commandQuit;
@@ -15,33 +13,25 @@ namespace RedditImageScheduler.UI {
 			commandAbout = new Command { MenuText = "&About", Shortcut = Application.Instance.CommonModifier | Keys.A };
 			commandQuit = new Command { MenuText = "&Quit", Shortcut = Application.Instance.CommonModifier | Keys.Q };
 
-			menuBar = new MenuBar() {
-				QuitItem = commandQuit,
-				HelpItems = { commandHome, commandAbout }
-			};
+			QuitItem = commandQuit;
+			HelpItems.Add(commandHome);
+			HelpItems.Add(commandAbout);
 		}
 
-		// ===============================================
-		// GETTERS / SETTERS
-		public MenuBar UI => menuBar;
-
-		// ===============================================
-		// PUBLIC METHODS
-		public void Initialize() {
-			Deinitialize();
+		protected override void OnLoad(EventArgs e) {
+			base.OnLoad(e);
+			
 			commandHome.Executed += OnHomePage;
 			commandQuit.Executed += OnQuit;
 			commandAbout.Executed += OnAbout;
 		}
 
-		public void Deinitialize() {
+		protected override void OnUnLoad(EventArgs e) {
 			commandHome.Executed -= OnHomePage;
 			commandQuit.Executed -= OnQuit;
 			commandAbout.Executed -= OnAbout;
+			base.OnUnLoad(e);
 		}
-
-		// ===============================================
-		// EVENTS
 		
 		// ===============================================
 		// CALLBACKS

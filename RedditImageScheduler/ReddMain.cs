@@ -22,21 +22,17 @@ namespace RedditImageScheduler {
 			Title = ReddLanguage.NAME;
 			MinimumSize = new Size(ReddConfig.WIDTH, ReddConfig.HEIGHT);
 
-			Content = uiContent.UI;
-			Menu = uiMenu.UI;
+			Content = uiContent;
+			Menu = uiMenu;
 		}
 		
 		protected override void OnShown(EventArgs e) {
 			base.OnShown(e);
 			INSTANCE = this;
-			uiMenu.Initialize();
-			uiContent.Initialize();
 		}
 
 		protected override void OnClosing(CancelEventArgs e) {
 			INSTANCE = null;
-			uiMenu.Deinitialize();
-			uiContent.Deinitialize();
 			base.OnClosing(e);
 		}
 
