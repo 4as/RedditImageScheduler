@@ -3,5 +3,6 @@ namespace RedditImageScheduler {
 		public static readonly string FILE = "database.sqlite";
 		public static readonly int WIDTH = 900;
 		public static readonly int HEIGHT = 500;
+		public static readonly uint CACHE_SIZE = 32;
 	}
 }

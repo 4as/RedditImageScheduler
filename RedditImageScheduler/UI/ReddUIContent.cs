@@ -61,6 +61,8 @@ namespace RedditImageScheduler.UI {
 		}
 		
 		private void OnSelect(object sender, EventArgs e) {
+			//TODO: if entry has pending changes show the "save changes?" dialog
+			
 			int idx = etoList.SelectedIndex;
 			if( idx < 0 || idx >= dataEntries.Count ) {
 				uiEntry.Unset();

@@ -7,7 +7,7 @@ namespace RedditImageScheduler.Data {
 	public class ReddDataEntry {
 		[PrimaryKey, AutoIncrement]
 		[Column(nameof(Id))]
-		public int Id { get; set; }
+		public uint Id { get; set; }
 
 		[Column(nameof(Timestamp))]
 		public long Timestamp { get; set; }

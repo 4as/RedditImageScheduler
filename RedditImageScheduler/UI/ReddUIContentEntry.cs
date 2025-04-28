@@ -4,6 +4,7 @@ using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Data;
+using RedditImageScheduler.UI.Core;
 
 namespace RedditImageScheduler.UI {
 	public class ReddUIContentEntry : DynamicLayout {
@@ -14,16 +15,13 @@ namespace RedditImageScheduler.UI {
 		private readonly TextBox etoSource = new TextBox();
 		private readonly DynamicLayout etoDate = new DynamicLayout();
 		private readonly Label etoLabelDate = new Label();
-		private readonly DateTimePicker etoDatePicker = new DateTimePicker();
+		private readonly ReddUIDate uiDatePicker = new ReddUIDate();
 		private readonly Label etoLabelHours = new Label();
 		private readonly NumericStepper etoDateHours = new NumericStepper();
-		private readonly ImageView etoImage = new ImageView();
+		private readonly ReddUIImage uiImage = new ReddUIImage();
 		private readonly OpenFileDialog etoDialog = new OpenFileDialog();
 		
-		private readonly Bitmap bmpPlaceholder = new Bitmap(128,128,PixelFormat.Format24bppRgb);
 		private ReddDataEntry dataEntry;
-		private Bitmap bmpCurrent;
-		private ImageFormat enumFormat;
 
 		public ReddUIContentEntry() {
 			Spacing = new Size(2, 2);
@@ -54,14 +52,9 @@ namespace RedditImageScheduler.UI {
 			etoLabelDate.Text = ReddLanguage.DATE;
 			etoDate.Add(etoLabelDate);
 			
-			etoDatePicker.Mode = DateTimePickerMode.Date;
-			etoDatePicker.MinDate = DateTime.Today;
-			//todo: kind of ugly - move it to a dedicated extending class? 
-			PropertyInfo prop = etoDatePicker.ControlObject.GetType().GetProperty("ShowCheckBox");
-			if( prop != null && prop.CanWrite ) {
-				prop.SetValue(etoDatePicker.ControlObject, false, null);
-			}
-			etoDate.Add(etoDatePicker);
+			uiDatePicker.Mode = DateTimePickerMode.Date;
+			uiDatePicker.MinDate = DateTime.Today;
+			etoDate.Add(uiDatePicker);
 			
 			etoLabelHours.VerticalAlignment = VerticalAlignment.Center;
 			etoLabelHours.Text = ReddLanguage.HOUR;
@@ -78,7 +71,7 @@ namespace RedditImageScheduler.UI {
 			etoDate.EndHorizontal();
 			Add(etoDate);
 			
-			AddCentered(etoImage);
+			AddCentered(uiImage);
 			
 			EndVertical();
 			
@@ -104,25 +97,23 @@ namespace RedditImageScheduler.UI {
 			if( entry == null ) return;
 			
 			dataEntry = entry;
-			//todo: create a Bitmap pooler, rather than instancing new bitmaps every time
-			bmpCurrent = dataEntry.Image == null ? null : new Bitmap(entry.Image);
 
 			DateTime date = entry.GetDate();
-			etoDatePicker.Value = date;
+			uiDatePicker.Value = date;
 			etoDateHours.Value = date.Hour;
 			etoTitle.Text = entry.Title;
 			etoSource.Text = entry.Source;
-			etoImage.Image = bmpCurrent ?? bmpPlaceholder;
+			uiImage.Set(dataEntry);
 			
 			etoSave.Click += OnButtonSave;
 			etoDelete.Click += OnButtonDelete;
-			etoImage.MouseUp += OnImage;
+			uiImage.MouseUp += OnImage;
 			
 			Visible = true;
 		}
 
 		public void Unset() {
-			etoImage.MouseUp -= OnImage;
+			uiImage.MouseUp -= OnImage;
 			etoSave.Click -= OnButtonSave;
 			etoDelete.Click -= OnButtonDelete;
 			Visible = false;
@@ -147,16 +138,14 @@ namespace RedditImageScheduler.UI {
 			etoSource.Width = Width;
 			int height = Height - (etoTitle.Height + etoSource.Height + etoDate.Height);
 			int size = Width < height ? Width : height;
-			etoImage.Size = new Size(size, size);
+			uiImage.Size = new Size(size, size);
 		}
 		
 		private void OnButtonSave(object sender, EventArgs e) {
 			dataEntry.Title = etoTitle.Text;
 			dataEntry.Source = etoSource.Text;
-			dataEntry.Image = bmpCurrent?.ToByteArray(enumFormat);
-			DateTime date = etoDatePicker.Value.GetValueOrDefault();
-			date = new DateTime(date.Year, date.Month, date.Day, (int)etoDateHours.Value, date.Minute, 0, date.Kind);
-			dataEntry.SetDate(date);
+			dataEntry.Image = uiImage.ToByteArray(); 
+			dataEntry.SetDate( uiDatePicker.GetDateAtHour((int)etoDateHours.Value) );
 			OnSave?.Invoke();
 		}
 
@@ -167,27 +156,7 @@ namespace RedditImageScheduler.UI {
 		private void OnImage(object sender, MouseEventArgs e) {
 			var result = etoDialog.ShowDialog(ParentWindow);
 			if( etoDialog.FileName != null && (result == DialogResult.Yes || result == DialogResult.Ok) ) {
-				FileStream file;
-				try {
-					file = File.Open(etoDialog.FileName, FileMode.Open);
-				}
-				catch( Exception ) {
-					MessageBox.Show(string.Format(ReddLanguage.ERROR_FILE_NOT_FOUND, etoDialog.FileName), ReddLanguage.ERROR, MessageBoxType.Error);
-					return;
-				}
-				
-				string ext = Path.GetExtension(etoDialog.FileName);
-				switch( ext ) {
-					case ".png": enumFormat = ImageFormat.Png; break;
-					case ".jpg": enumFormat = ImageFormat.Jpeg; break;
-					case ".jpeg": enumFormat = ImageFormat.Jpeg; break;
-					case ".gif": enumFormat = ImageFormat.Gif; break;
-					case ".bmp": enumFormat = ImageFormat.Bitmap; break;
-					default: return;
-				}
-				
-				bmpCurrent = new Bitmap(file);
-				etoImage.Image = bmpCurrent;
+				uiImage.Set(etoDialog.FileName);
 			}
 		}
 	}
