@@ -5,9 +5,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Eto.Forms" Version="2.8.2"/>
+        <PackageReference Include="Eto.Forms" Version="2.8.2" />
         <PackageReference Include="Reddit" Version="1.5.2" />
         <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Resources\drop_icon.png" />
+      <EmbeddedResource Include="Resources\drop_icon.png" />
     </ItemGroup>
 
 </Project>

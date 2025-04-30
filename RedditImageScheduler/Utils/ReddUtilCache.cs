@@ -14,6 +14,10 @@ namespace RedditImageScheduler.Utils {
 			listItems = new LinkedList<CacheItem>();
 		}
 
+		public bool Has(TKey key) {
+			return dictCache.ContainsKey(key);
+		}
+
 		public Bitmap Get(TKey key) {
 			if( dictCache.TryGetValue(key, out var node) ) {
 				listItems.Remove(node);

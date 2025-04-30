@@ -61,16 +61,36 @@ namespace RedditImageScheduler.UI {
 		}
 		
 		private void OnSelect(object sender, EventArgs e) {
-			//TODO: if entry has pending changes show the "save changes?" dialog
-			
 			int idx = etoList.SelectedIndex;
 			if( idx < 0 || idx >= dataEntries.Count ) {
 				uiEntry.Unset();
 				return;
 			}
+
+			ReddDataEntry saved = null;
+			int current;
+			if( uiEntry.HasChanges && (current = dataEntries.IndexOf(uiEntry.Data)) != idx ) {
+				DialogResult result = MessageBox.Show(ReddLanguage.MESSAGE_UNSAVED_CHANGES, MessageBoxButtons.YesNoCancel, MessageBoxType.Question, MessageBoxDefaultButton.Yes);
+				switch( result ) {
+					case DialogResult.Yes:
+						// saving is done like this to avoid recursive updates (OnSave()->OnSelect())
+						saved = uiEntry.Commit();
+						break;
+					case DialogResult.No:
+						break;
+					case DialogResult.Cancel:
+					default:
+						etoList.SelectedIndex = current;
+						return;
+				}
+			}
 			
 			ReddDataEntry entry = dataEntries[idx];
 			uiEntry.Set(entry);
+
+			if( saved != null ) {
+				dataEntries.Update(saved);
+			}
 		}
 		
 		private void OnAdd(object sender, EventArgs eventArgs) {
@@ -78,7 +98,8 @@ namespace RedditImageScheduler.UI {
 		}
 		
 		private void OnSave() {
-			dataEntries.Update(uiEntry.Data);
+			ReddDataEntry entry = uiEntry.Commit();
+			dataEntries.Update(entry);
 		}
 
 		private void OnRemove() {

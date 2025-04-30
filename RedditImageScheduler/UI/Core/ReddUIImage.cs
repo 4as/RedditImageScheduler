@@ -1,4 +1,5 @@
 using System.IO;
+using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Data;
@@ -6,13 +7,13 @@ using RedditImageScheduler.Utils;
 
 namespace RedditImageScheduler.UI.Core {
 	public class ReddUIImage : ImageView {
-		private static readonly Bitmap PLACEHOLDER = new Bitmap(128,128,PixelFormat.Format24bppRgb);
+		private static readonly Icon ICON_PLACEHOLDER = Icon.FromResource("RedditImageScheduler.Resources.drop_icon.png", Assembly.GetExecutingAssembly());
 
 		private readonly ReddUtilBitmap utilBitmap = new ReddUtilBitmap();
 		private ReddDataEntry dataEntry;
 
 		public ReddUIImage() {
-			Image = PLACEHOLDER;
+			Image = ICON_PLACEHOLDER;
 		}
 		
 		public bool HasFile => utilBitmap.HasFormat;
@@ -21,7 +22,7 @@ namespace RedditImageScheduler.UI.Core {
 
 		public void Unset() {
 			utilBitmap.Unset();
-			Image = PLACEHOLDER;
+			Image = ICON_PLACEHOLDER;
 			dataEntry = null;
 		}
 

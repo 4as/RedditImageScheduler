@@ -6,10 +6,8 @@ namespace RedditImageScheduler.Utils {
 	public static class ReddUtilBitmaps {
 		private static readonly ReddUtilCache<uint> CACHE_ENTRIES = new ReddUtilCache<uint>(ReddConfig.CACHE_SIZE);
 		private static readonly ReddUtilCache<string> CACHE_FILES = new ReddUtilCache<string>(ReddConfig.CACHE_SIZE);
-
-		//TODO: do something like Convert(file, id, bitmap) to move bitmap into entries cache when it gets saved
 		
-		public static Bitmap GetBitmap(ReddDataEntry entry) {
+		public static Bitmap Get(ReddDataEntry entry) {
 			Bitmap bmp = CACHE_ENTRIES.Get(entry.Id);
 			if( bmp == null ) {
 				bmp = new Bitmap(entry.Image);
@@ -19,7 +17,7 @@ namespace RedditImageScheduler.Utils {
 			return bmp;
 		}
 
-		public static Bitmap GetBitmap(FileStream stream) {
+		public static Bitmap Get(FileStream stream) {
 			Bitmap bmp = CACHE_FILES.Get(stream.Name);
 			if( bmp == null ) {
 				bmp = new Bitmap(stream);
@@ -27,6 +25,11 @@ namespace RedditImageScheduler.Utils {
 			}
 
 			return bmp;
+		}
+
+		public static void Add(ReddDataEntry entry) {
+			if( entry.Image == null ) return;
+			CACHE_ENTRIES.Add(entry.Id, new Bitmap(entry.Image));
 		}
 	}
 }

@@ -33,7 +33,7 @@ namespace RedditImageScheduler.Utils {
 				default: Unset(); return;
 			}
 
-			bmpBitmap = ReddUtilBitmaps.GetBitmap(file);
+			bmpBitmap = ReddUtilBitmaps.Get(file);
 		}
 
 		public void Set(ReddDataEntry entry) {
@@ -43,7 +43,7 @@ namespace RedditImageScheduler.Utils {
 			}
 			
 			hasFormat = false;
-			bmpBitmap = ReddUtilBitmaps.GetBitmap(entry);
+			bmpBitmap = ReddUtilBitmaps.Get(entry);
 		}
 
 		public byte[] ToByteArray() {

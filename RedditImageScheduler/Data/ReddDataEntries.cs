@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using RedditImageScheduler.IO;
+using RedditImageScheduler.Utils;
 
 namespace RedditImageScheduler.Data {
 	public class ReddDataEntries : IReadOnlyList<ReddDataEntry> {
@@ -42,6 +43,8 @@ namespace RedditImageScheduler.Data {
 			else {
 				ioEntries.Update(entry);
 			}
+
+			ReddUtilBitmaps.Add(entry);
 		}
 
 		public void Remove(ReddDataEntry entry) {

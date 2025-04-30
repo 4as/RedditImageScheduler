@@ -22,6 +22,7 @@ namespace RedditImageScheduler.UI {
 		private readonly OpenFileDialog etoDialog = new OpenFileDialog();
 		
 		private ReddDataEntry dataEntry;
+		private bool hasChanges = false;
 
 		public ReddUIContentEntry() {
 			Spacing = new Size(2, 2);
@@ -86,6 +87,7 @@ namespace RedditImageScheduler.UI {
 		// ===============================================
 		// GETTERS / SETTERS
 		public ReddDataEntry Data => dataEntry;
+		public bool HasChanges => dataEntry != null && (hasChanges || uiImage.HasFile);
 
 		// ===============================================
 		// PUBLIC METHODS
@@ -107,17 +109,35 @@ namespace RedditImageScheduler.UI {
 			
 			etoSave.Click += OnButtonSave;
 			etoDelete.Click += OnButtonDelete;
+			etoSource.TextChanged += OnModify;
+			etoTitle.TextChanged += OnModify;
+			etoDateHours.ValueChanged += OnModify;
+			uiDatePicker.ValueChanged += OnModify;
 			uiImage.MouseUp += OnImage;
 			
 			Visible = true;
 		}
 
 		public void Unset() {
+			hasChanges = false;
 			uiImage.MouseUp -= OnImage;
+			etoSource.TextChanged -= OnModify;
+			etoTitle.TextChanged -= OnModify;
+			etoDateHours.ValueChanged -= OnModify;
+			uiDatePicker.ValueChanged -= OnModify;
 			etoSave.Click -= OnButtonSave;
 			etoDelete.Click -= OnButtonDelete;
 			Visible = false;
 			dataEntry = null;
+		}
+
+		public ReddDataEntry Commit() {
+			dataEntry.Title = etoTitle.Text;
+			dataEntry.Source = etoSource.Text;
+			dataEntry.Image = uiImage.ToByteArray(); 
+			dataEntry.SetDate( uiDatePicker.GetDateAtHour((int)etoDateHours.Value) );
+			hasChanges = false;
+			return dataEntry;
 		}
 
 		// ===============================================
@@ -141,11 +161,17 @@ namespace RedditImageScheduler.UI {
 			uiImage.Size = new Size(size, size);
 		}
 		
+		private void OnModify(object sender, EventArgs e) {
+			DateTime date = dataEntry.GetDate();
+			hasChanges = etoTitle.Text != dataEntry.Title ||
+						 etoSource.Text != dataEntry.Source ||
+						 (int)etoDateHours.Value != date.Hour ||
+						 uiDatePicker.Value.GetValueOrDefault() != date;
+
+		}
+		
 		private void OnButtonSave(object sender, EventArgs e) {
-			dataEntry.Title = etoTitle.Text;
-			dataEntry.Source = etoSource.Text;
-			dataEntry.Image = uiImage.ToByteArray(); 
-			dataEntry.SetDate( uiDatePicker.GetDateAtHour((int)etoDateHours.Value) );
+			
 			OnSave?.Invoke();
 		}
 
