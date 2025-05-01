@@ -12,6 +12,7 @@ namespace RedditImageScheduler.Utils {
 			if( bmp == null ) {
 				bmp = new Bitmap(entry.Image);
 				CACHE_ENTRIES.Add(entry.Id, bmp);
+				ReddDebug.Trace("Getting bitmap for entry: "+entry.Id+". ENTRIES: "+CACHE_ENTRIES.Length+", FILES: "+CACHE_FILES.Length);
 			}
 
 			return bmp;
@@ -22,6 +23,7 @@ namespace RedditImageScheduler.Utils {
 			if( bmp == null ) {
 				bmp = new Bitmap(stream);
 				CACHE_FILES.Add(stream.Name, bmp);
+				ReddDebug.Trace("Getting bitmap for file: "+Path.GetFileName(stream.Name)+". ENTRIES: "+CACHE_ENTRIES.Length+", FILES: "+CACHE_FILES.Length);
 			}
 
 			return bmp;
@@ -29,7 +31,9 @@ namespace RedditImageScheduler.Utils {
 
 		public static void Add(ReddDataEntry entry) {
 			if( entry.Image == null ) return;
-			CACHE_ENTRIES.Add(entry.Id, new Bitmap(entry.Image));
+			Bitmap bmp = new Bitmap(entry.Image);
+			CACHE_ENTRIES.Add(entry.Id, bmp);
+			ReddDebug.Trace("Adding bitmap for entry: "+entry.Id+". ENTRIES: "+CACHE_ENTRIES.Length+", FILES: "+CACHE_FILES.Length);
 		}
 	}
 }

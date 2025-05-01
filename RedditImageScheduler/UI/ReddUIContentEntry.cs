@@ -1,35 +1,25 @@
 using System;
-using System.IO;
-using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Data;
-using RedditImageScheduler.UI.Core;
+using RedditImageScheduler.UI.Entry;
 
 namespace RedditImageScheduler.UI {
 	public class ReddUIContentEntry : DynamicLayout {
 		private readonly DynamicLayout etoButtons = new DynamicLayout();
 		private readonly Button etoSave = new Button();
 		private readonly Button etoDelete = new Button();
-		private readonly TextBox etoTitle = new TextBox();
-		private readonly TextBox etoSource = new TextBox();
-		private readonly DynamicLayout etoDate = new DynamicLayout();
-		private readonly Label etoLabelDate = new Label();
-		private readonly ReddUIDate uiDatePicker = new ReddUIDate();
-		private readonly Label etoLabelHours = new Label();
-		private readonly NumericStepper etoDateHours = new NumericStepper();
+		private readonly ReddUITitle uiTitle = new ReddUITitle();
+		private readonly ReddUISource uiSource = new ReddUISource();
+		private readonly ReddUIDate uiDate = new ReddUIDate();
 		private readonly ReddUIImage uiImage = new ReddUIImage();
-		private readonly OpenFileDialog etoDialog = new OpenFileDialog();
+		private readonly ReddUIStatus uiStatus = new ReddUIStatus();
 		
 		private ReddDataEntry dataEntry;
-		private bool hasChanges = false;
 
 		public ReddUIContentEntry() {
 			Spacing = new Size(2, 2);
-
-			etoDialog.MultiSelect = false;
-			etoDialog.Filters.Add(new FileFilter("Images", ".png", ".jpg", ".jpeg", ".gif", ".bmp"));
-
+			
 			BeginVertical();
 			
 			etoButtons.BeginHorizontal();
@@ -39,40 +29,13 @@ namespace RedditImageScheduler.UI {
 			etoDelete.Text = ReddLanguage.REMOVE;
 			etoButtons.Add(etoDelete);
 			etoButtons.EndHorizontal();
+			
 			Add(etoButtons);
-			
-			etoTitle.PlaceholderText = ReddLanguage.TITLE;
-			Add(etoTitle);
-			
-			etoSource.PlaceholderText = ReddLanguage.SOURCE;
-			Add(etoSource);
-			
-			etoDate.BeginHorizontal();
-			
-			etoLabelDate.VerticalAlignment = VerticalAlignment.Center;
-			etoLabelDate.Text = ReddLanguage.DATE;
-			etoDate.Add(etoLabelDate);
-			
-			uiDatePicker.Mode = DateTimePickerMode.Date;
-			uiDatePicker.MinDate = DateTime.Today;
-			etoDate.Add(uiDatePicker);
-			
-			etoLabelHours.VerticalAlignment = VerticalAlignment.Center;
-			etoLabelHours.Text = ReddLanguage.HOUR;
-			etoDate.Add(etoLabelHours);
-			
-			etoDateHours.Increment = 1;
-			etoDateHours.Wrap = true;
-			etoDateHours.DecimalPlaces = 0;
-			etoDateHours.MaximumDecimalPlaces = 0;
-			etoDateHours.MinValue = 0;
-			etoDateHours.MaxValue = 23;
-			etoDate.Add(etoDateHours);
-			
-			etoDate.EndHorizontal();
-			Add(etoDate);
-			
-			AddCentered(uiImage);
+			Add(uiTitle);
+			Add(uiSource);
+			Add(uiDate);
+			AddCentered( uiImage, null, null, true, true, true, true);
+			Add(uiStatus);
 			
 			EndVertical();
 			
@@ -87,7 +50,8 @@ namespace RedditImageScheduler.UI {
 		// ===============================================
 		// GETTERS / SETTERS
 		public ReddDataEntry Data => dataEntry;
-		public bool HasChanges => dataEntry != null && (hasChanges || uiImage.HasFile);
+		public bool HasChanges => dataEntry != null && uiStatus.HasChanges;
+		public bool IsValid => uiTitle.IsValid && uiSource.IsValid && uiImage.IsValid && uiDate.IsValid;
 
 		// ===============================================
 		// PUBLIC METHODS
@@ -99,44 +63,50 @@ namespace RedditImageScheduler.UI {
 			if( entry == null ) return;
 			
 			dataEntry = entry;
-
-			DateTime date = entry.GetDate();
-			uiDatePicker.Value = date;
-			etoDateHours.Value = date.Hour;
-			etoTitle.Text = entry.Title;
-			etoSource.Text = entry.Source;
+			
+			uiTitle.Text = entry.Title;
+			uiSource.Text = entry.Source;
+			uiDate.Date = entry.Date;
 			uiImage.Set(dataEntry);
+			
+			uiStatus.LastDate = entry.Date;
+			uiStatus.CurrentDate = entry.Date;
+			OnValidate();
 			
 			etoSave.Click += OnButtonSave;
 			etoDelete.Click += OnButtonDelete;
-			etoSource.TextChanged += OnModify;
-			etoTitle.TextChanged += OnModify;
-			etoDateHours.ValueChanged += OnModify;
-			uiDatePicker.ValueChanged += OnModify;
-			uiImage.MouseUp += OnImage;
+			
+			uiTitle.OnTitleChanged += OnModify;
+			uiDate.OnDateChanged += OnModify;
+			uiImage.OnImageChanged += OnModify;
+			uiSource.OnSourceChanged += OnModify;
 			
 			Visible = true;
 		}
 
 		public void Unset() {
-			hasChanges = false;
-			uiImage.MouseUp -= OnImage;
-			etoSource.TextChanged -= OnModify;
-			etoTitle.TextChanged -= OnModify;
-			etoDateHours.ValueChanged -= OnModify;
-			uiDatePicker.ValueChanged -= OnModify;
+			uiStatus.HasChanges = false;
+			
+			uiTitle.OnTitleChanged -= OnModify;
+			uiDate.OnDateChanged -= OnModify;
+			uiImage.OnImageChanged -= OnModify;
+			uiSource.OnSourceChanged -= OnModify;
+			
 			etoSave.Click -= OnButtonSave;
 			etoDelete.Click -= OnButtonDelete;
+			
 			Visible = false;
 			dataEntry = null;
 		}
 
 		public ReddDataEntry Commit() {
-			dataEntry.Title = etoTitle.Text;
-			dataEntry.Source = etoSource.Text;
-			dataEntry.Image = uiImage.ToByteArray(); 
-			dataEntry.SetDate( uiDatePicker.GetDateAtHour((int)etoDateHours.Value) );
-			hasChanges = false;
+			dataEntry.Title = uiTitle.Text;
+			dataEntry.Source = uiSource.Text;
+			dataEntry.Image = uiImage.ToByteArray();
+			dataEntry.Date = uiDate.Date;
+			dataEntry.IsValid = IsValid;
+			uiImage.Set(dataEntry);
+			uiStatus.HasChanges = false;
 			return dataEntry;
 		}
 
@@ -153,37 +123,36 @@ namespace RedditImageScheduler.UI {
 			OnAlign();
 		}
 
-		protected virtual void OnAlign() {
-			etoTitle.Width = Width;
-			etoSource.Width = Width;
-			int height = Height - (etoTitle.Height + etoSource.Height + etoDate.Height);
+		protected void OnAlign() {
+			uiTitle.Width = Width;
+			uiSource.Width = Width;
+			uiStatus.Width = Width;
+			int height = Height - (uiTitle.Height + uiSource.Height + uiDate.Height + uiStatus.Height + etoButtons.Height);
 			int size = Width < height ? Width : height;
 			uiImage.Size = new Size(size, size);
 		}
-		
-		private void OnModify(object sender, EventArgs e) {
-			DateTime date = dataEntry.GetDate();
-			hasChanges = etoTitle.Text != dataEntry.Title ||
-						 etoSource.Text != dataEntry.Source ||
-						 (int)etoDateHours.Value != date.Hour ||
-						 uiDatePicker.Value.GetValueOrDefault() != date;
 
+		protected void OnValidate() {
+			uiStatus.HasValidTitle = uiTitle.IsValid;
+			uiStatus.HasValidSource = uiSource.IsValid;
+			uiStatus.HasValidDate = uiDate.IsValid;
+			uiStatus.HasValidImage = uiImage.IsValid;
+		}
+		
+		private void OnModify() {
+			uiStatus.HasChanges = uiTitle.Text != dataEntry.Title ||
+								  uiSource.Text != dataEntry.Source ||
+								  uiDate.Date != dataEntry.Date ||
+								  uiImage.HasChanged;
+			OnValidate();
 		}
 		
 		private void OnButtonSave(object sender, EventArgs e) {
-			
 			OnSave?.Invoke();
 		}
 
 		private void OnButtonDelete(object sender, EventArgs e) {
 			OnDelete?.Invoke();
-		}
-		
-		private void OnImage(object sender, MouseEventArgs e) {
-			var result = etoDialog.ShowDialog(ParentWindow);
-			if( etoDialog.FileName != null && (result == DialogResult.Yes || result == DialogResult.Ok) ) {
-				uiImage.Set(etoDialog.FileName);
-			}
 		}
 	}
 }

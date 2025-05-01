@@ -5,32 +5,17 @@ using RedditImageScheduler.Data;
 namespace RedditImageScheduler.Utils {
 	public class ReddUtilBitmap {
 		private Bitmap bmpBitmap;
-		private ImageFormat enumFormat;
-		private bool hasFormat;
 		
 		public Bitmap Bitmap => bmpBitmap;
-		public bool HasFormat => hasFormat;
 
 		public void Unset() {
 			bmpBitmap = null;
-			hasFormat = false;
 		}
 		
 		public void Set(FileStream file) {
-			if( file == null ) {
+			if( file == null) {
 				Unset();
 				return;
-			}
-			
-			string ext = Path.GetExtension(file.Name);
-			hasFormat = true;
-			switch( ext ) {
-				case ".png": enumFormat = ImageFormat.Png; break;
-				case ".jpg": enumFormat = ImageFormat.Jpeg; break;
-				case ".jpeg": enumFormat = ImageFormat.Jpeg; break;
-				case ".gif": enumFormat = ImageFormat.Gif; break;
-				case ".bmp": enumFormat = ImageFormat.Bitmap; break;
-				default: Unset(); return;
 			}
 
 			bmpBitmap = ReddUtilBitmaps.Get(file);
@@ -42,12 +27,20 @@ namespace RedditImageScheduler.Utils {
 				return;
 			}
 			
-			hasFormat = false;
 			bmpBitmap = ReddUtilBitmaps.Get(entry);
 		}
 
+		public void Set(Image image) {
+			if( image == null ) {
+				Unset();
+				return;
+			}
+			
+			bmpBitmap = new Bitmap(image);
+		}
+
 		public byte[] ToByteArray() {
-			return hasFormat ? bmpBitmap.ToByteArray(enumFormat) : null;
+			return bmpBitmap?.ToByteArray(ImageFormat.Png) ?? null;
 		}
 	}
 }

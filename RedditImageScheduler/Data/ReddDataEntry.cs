@@ -20,14 +20,13 @@ namespace RedditImageScheduler.Data {
 
 		[Column(nameof(Image))]
 		public byte[] Image { get; set; }
+		
+		[Column(nameof(IsValid))]
+		public bool IsValid { get; set; }
 
-		public void SetDate(DateTime date) {
-			Timestamp = new DateTimeOffset(date).ToUnixTimeSeconds();
-		}
-
-		public DateTime GetDate() {
-			DateTimeOffset current = DateTimeOffset.FromUnixTimeSeconds(Timestamp);
-			return current.UtcDateTime;
+		public DateTime Date {
+			get => DateTimeOffset.FromUnixTimeSeconds(Timestamp).UtcDateTime;
+			set => Timestamp = new DateTimeOffset(value).ToUnixTimeSeconds();
 		}
 
 		private readonly StringBuilder sBuilder = new StringBuilder();

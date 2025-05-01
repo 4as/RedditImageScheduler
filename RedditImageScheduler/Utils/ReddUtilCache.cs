@@ -14,6 +14,8 @@ namespace RedditImageScheduler.Utils {
 			listItems = new LinkedList<CacheItem>();
 		}
 
+		public uint Length => (uint)listItems.Count;
+
 		public bool Has(TKey key) {
 			return dictCache.ContainsKey(key);
 		}

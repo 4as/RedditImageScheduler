@@ -28,7 +28,7 @@ namespace RedditImageScheduler.Data {
 			raw.Title = title;
 			raw.Source = source;
 			raw.Image = image;
-			raw.SetDate(date);
+			raw.Date = date;
 			listEntries.Add(raw);
 			ioEntries.Insert(raw);
 			return raw;
