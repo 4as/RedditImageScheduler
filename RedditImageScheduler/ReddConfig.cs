@@ -1,12 +1,17 @@
 using Eto.Drawing;
+using Eto.Forms;
 
 namespace RedditImageScheduler {
 	public static class ReddConfig {
 		public static readonly string FILE = "database.sqlite";
+		public static readonly string HOMEPAGE = "https://github.com/4as/RedditImageScheduler";
+		public static readonly FileFilter IMAGE_FILTER = new FileFilter("Images", ".png", ".jpg", ".jpeg", ".gif", ".bmp");
+		
 		public static readonly int WIDTH = 900;
 		public static readonly int HEIGHT = 500;
 		public static readonly uint CACHE_SIZE = 32;
 		
+		public static readonly uint ENTRY_HOURS_SPACING = 12; //todo: move to options
 		public static readonly uint ENTRY_TITLE_LENGTH = 4;
 
 		public static readonly Color UI_BG_DEFAULT = new Color(1f, 1f, 1f, 1f);

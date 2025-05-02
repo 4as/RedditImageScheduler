@@ -1,5 +1,7 @@
 using System;
 using System.Text;
+using Eto.Drawing;
+using RedditImageScheduler.Utils;
 using SQLite;
 
 namespace RedditImageScheduler.Data {
@@ -24,9 +26,16 @@ namespace RedditImageScheduler.Data {
 		[Column(nameof(IsValid))]
 		public bool IsValid { get; set; }
 
+		[Ignore]
 		public DateTime Date {
-			get => DateTimeOffset.FromUnixTimeSeconds(Timestamp).UtcDateTime;
+			get => DateTimeOffset.FromUnixTimeSeconds(Timestamp).ToLocalTime().DateTime;
 			set => Timestamp = new DateTimeOffset(value).ToUnixTimeSeconds();
+		}
+
+		[Ignore]
+		public ReddUtilBitmap Bitmap {
+			get => new ReddUtilBitmap(Id, Image);
+			set => Image = value.ToByteArray();
 		}
 
 		private readonly StringBuilder sBuilder = new StringBuilder();

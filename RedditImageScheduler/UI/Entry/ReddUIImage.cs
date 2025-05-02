@@ -11,17 +11,16 @@ namespace RedditImageScheduler.UI.Entry {
 		private static readonly Icon ICON_PLACEHOLDER = Icon.FromResource("RedditImageScheduler.Resources.drop_icon.png", Assembly.GetExecutingAssembly());
 
 		private readonly OpenFileDialog etoDialog = new OpenFileDialog();
-		private readonly ReddUtilBitmap utilBitmap = new ReddUtilBitmap();
-		private ReddDataEntry dataEntry;
+		
+		private ReddUtilBitmap utilBitmap;
 		private bool hasChanged = false;
 		private bool isPressed = false;
 
 		public ReddUIImage() {
 			etoDialog.MultiSelect = false;
-			etoDialog.Filters.Add(new FileFilter("Images", ".png", ".jpg", ".jpeg", ".gif", ".bmp"));
+			etoDialog.Filters.Add(ReddConfig.IMAGE_FILTER);
 			
 			Image = ICON_PLACEHOLDER;
-			AllowDrop = true;
 		}
 
 		protected override void OnLoad(EventArgs e) {
@@ -42,14 +41,22 @@ namespace RedditImageScheduler.UI.Entry {
 		// GETTERS / SETTERS
 		public bool HasChanged => hasChanged;
 		public bool IsValid => utilBitmap.Bitmap != null;
+		public ReddUtilBitmap Bitmap => utilBitmap;
 
 		// ===============================================
 		// PUBLIC METHODS
 		public void Unset() {
-			utilBitmap.Unset();
-			SetImage(utilBitmap);
-			dataEntry = null;
+			SetImage( new ReddUtilBitmap() );
 			hasChanged = false;
+		}
+		
+		public void Set(ReddUtilBitmap bitmap) {
+			if( !bitmap.IsValid ) {
+				Unset();
+				return;
+			}
+			
+			SetImage(bitmap);
 		}
 
 		public void Set(string file_path) {
@@ -59,40 +66,38 @@ namespace RedditImageScheduler.UI.Entry {
 			}
 			
 			try {
-				using( FileStream file = File.OpenRead(file_path) ) {
-					utilBitmap.Set(file);
-					SetImage(utilBitmap);
-					dataEntry = null;
-				}
+				byte[] bytes = File.ReadAllBytes( file_path );
+				SetImage( new ReddUtilBitmap(file_path, bytes) );
+				hasChanged = true;
 			}
 			catch( Exception ) {
 				MessageBox.Show(string.Format(ReddLanguage.ERROR_FILE_NOT_FOUND, file_path), ReddLanguage.ERROR, MessageBoxType.Error);
 			}
 		}
-
-		public void Set(ReddDataEntry entry) {
-			if( entry?.Image == null ) {
+		
+		public void Set(Image image) {
+			if( image == null ) {
 				Unset();
 				return;
 			}
 			
-			dataEntry = entry;
-			utilBitmap.Set(dataEntry);
-			SetImage(utilBitmap);
+			SetImage(new ReddUtilBitmap(image));
+			hasChanged = true;
 		}
 		
-		public byte[] ToByteArray() => dataEntry != null ? dataEntry.Image : utilBitmap.ToByteArray();
+		public byte[] ToByteArray() => utilBitmap.ToByteArray();
 
 		// ===============================================
 		// NON-PUBLIC METHODS
 		private void SetImage(ReddUtilBitmap bitmap) {
-			if( bitmap.Bitmap == null ) {
+			utilBitmap = bitmap;
+			if( utilBitmap.Bitmap == null ) {
 				Image = ICON_PLACEHOLDER;
 				BackgroundColor = ReddConfig.UI_BG_DEFAULT;
 			}
 			else {
-				Image = bitmap.Bitmap;
-				BackgroundColor = new Color(0f, 0f, 0f, 0f);
+				Image = utilBitmap.Bitmap;
+				BackgroundColor = ReddConfig.UI_BG_EMPTY;
 			}
 
 			OnImageChanged?.Invoke();
@@ -105,33 +110,6 @@ namespace RedditImageScheduler.UI.Entry {
 
 		// ===============================================
 		// CALLBACKS
-		protected override void OnDragEnter(DragEventArgs e) {
-			base.OnDragEnter(e);
-			if( e.Data.ContainsUris || e.Data.ContainsImage ) {
-				e.Effects = DragEffects.Copy;
-			}
-			else {
-				e.Effects = DragEffects.None;
-			}
-		}
-
-		protected override void OnDragDrop(DragEventArgs e) {
-			base.OnDragDrop(e);
-			if( e.Data.ContainsUris ) {
-				Uri uri = e.Data.Uris[0];
-				if( uri.IsFile ) {
-					Set(uri.LocalPath);
-					hasChanged = true;
-				}
-			}
-			else if( e.Data.ContainsImage ) {
-				utilBitmap.Set(e.Data.Image);
-				SetImage(utilBitmap);
-				dataEntry = null;
-				hasChanged = true;
-			}
-		}
-		
 		private void OnImageDown(object sender, MouseEventArgs e) {
 			isPressed = true;
 		}
@@ -150,7 +128,6 @@ namespace RedditImageScheduler.UI.Entry {
 			var result = etoDialog.ShowDialog(ParentWindow);
 			if( etoDialog.FileName != null && (result == DialogResult.Yes || result == DialogResult.Ok) ) {
 				Set(etoDialog.FileName);
-				hasChanged = true;
 			}
 		}
 	}

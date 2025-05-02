@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using RedditImageScheduler.Data;
 using SQLite;
 
 namespace RedditImageScheduler.IO {
-	public class ReddIOEntries {
+	public class ReddIOEntries : INotifyCollectionChanged {
 		private readonly SQLiteConnection sqlConnection;
 		private readonly ReddDataEntries dataEntries;
 		public ReddIOEntries(SQLiteConnection connection) {
@@ -16,7 +17,7 @@ namespace RedditImageScheduler.IO {
 
 		public List<ReddDataEntry> GetAll() {
 			try {
-				sqlConnection.Query<ReddDataEntry>("SELECT * FROM " + nameof(ReddDataEntry));
+				return sqlConnection.Table<ReddDataEntry>().ToList();
 			}
 			catch( Exception ) {
 				OnError?.Invoke();
@@ -32,6 +33,7 @@ namespace RedditImageScheduler.IO {
 					OnError?.Invoke();
 				}
 				else {
+					CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, entry));
 					OnUpdate?.Invoke();
 				}
 			}
@@ -43,6 +45,7 @@ namespace RedditImageScheduler.IO {
 		public void Update(ReddDataEntry entry) {
 			try {
 				sqlConnection.Update(entry);
+				CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset, null));
 				OnUpdate?.Invoke();
 			}
 			catch( Exception ) {
@@ -53,6 +56,7 @@ namespace RedditImageScheduler.IO {
 		public void Remove(ReddDataEntry entry) {
 			try {
 				sqlConnection.Delete(entry);
+				CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, entry));
 				OnUpdate?.Invoke();
 			}
 			catch( Exception ) {
@@ -66,5 +70,6 @@ namespace RedditImageScheduler.IO {
 
 		public event IOEntriesEvent OnUpdate;
 		public event IOEntriesEvent OnError;
+		public event NotifyCollectionChangedEventHandler CollectionChanged;
 	}
 }

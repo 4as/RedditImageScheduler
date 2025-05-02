@@ -6,34 +6,34 @@ namespace RedditImageScheduler.Utils {
 	public static class ReddUtilBitmaps {
 		private static readonly ReddUtilCache<uint> CACHE_ENTRIES = new ReddUtilCache<uint>(ReddConfig.CACHE_SIZE);
 		private static readonly ReddUtilCache<string> CACHE_FILES = new ReddUtilCache<string>(ReddConfig.CACHE_SIZE);
+
+		public static uint NumEntries => CACHE_ENTRIES.Length;
+		public static uint NumFiles => CACHE_FILES.Length;
 		
-		public static Bitmap Get(ReddDataEntry entry) {
-			Bitmap bmp = CACHE_ENTRIES.Get(entry.Id);
+		public static Bitmap Get(uint id, byte[] image_bytes) {
+			Bitmap bmp = CACHE_ENTRIES.Get(id);
 			if( bmp == null ) {
-				bmp = new Bitmap(entry.Image);
-				CACHE_ENTRIES.Add(entry.Id, bmp);
-				ReddDebug.Trace("Getting bitmap for entry: "+entry.Id+". ENTRIES: "+CACHE_ENTRIES.Length+", FILES: "+CACHE_FILES.Length);
+				bmp = new Bitmap(image_bytes);
+				CACHE_ENTRIES.Add(id, bmp);
 			}
 
 			return bmp;
 		}
 
-		public static Bitmap Get(FileStream stream) {
-			Bitmap bmp = CACHE_FILES.Get(stream.Name);
+		public static Bitmap Get(string filepath, byte[] image_bytes) {
+			Bitmap bmp = CACHE_FILES.Get(filepath);
 			if( bmp == null ) {
-				bmp = new Bitmap(stream);
-				CACHE_FILES.Add(stream.Name, bmp);
-				ReddDebug.Trace("Getting bitmap for file: "+Path.GetFileName(stream.Name)+". ENTRIES: "+CACHE_ENTRIES.Length+", FILES: "+CACHE_FILES.Length);
+				bmp = new Bitmap(image_bytes);
+				CACHE_FILES.Add(filepath, bmp);
 			}
 
 			return bmp;
 		}
 
-		public static void Add(ReddDataEntry entry) {
-			if( entry.Image == null ) return;
-			Bitmap bmp = new Bitmap(entry.Image);
-			CACHE_ENTRIES.Add(entry.Id, bmp);
-			ReddDebug.Trace("Adding bitmap for entry: "+entry.Id+". ENTRIES: "+CACHE_ENTRIES.Length+", FILES: "+CACHE_FILES.Length);
+		public static void Add(uint id, byte[] image_bytes) {
+			if( image_bytes == null ) return;
+			Bitmap bmp = new Bitmap(image_bytes);
+			CACHE_ENTRIES.Add(id, bmp);
 		}
 	}
 }

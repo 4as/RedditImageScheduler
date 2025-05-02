@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using RedditImageScheduler.Data;
 using SQLite;
 
@@ -24,12 +25,12 @@ namespace RedditImageScheduler.IO {
 		// PUBLIC
 		public void Open() {
 			try {
-				sqlConnection = new SQLiteConnection(sFile);
-				//TODO: remember to remove those drops in release
-				sqlConnection.DropTable<ReddDataEntry>();
-
-				sqlConnection.CreateTable<ReddDataEntry>();
+				SQLiteConnectionString options = new SQLiteConnectionString(sFile, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite, true);
+				sqlConnection = new SQLiteConnection(options);
 				
+				//sqlConnection.DropTable<ReddDataEntry>();
+				
+				sqlConnection.CreateTable<ReddDataEntry>();
 				
 				ioEntries = new ReddIOEntries(sqlConnection);
 				ioEntries.OnError += OnEntriesError;

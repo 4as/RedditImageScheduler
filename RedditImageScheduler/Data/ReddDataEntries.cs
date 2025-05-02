@@ -1,11 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using RedditImageScheduler.IO;
 using RedditImageScheduler.Utils;
 
 namespace RedditImageScheduler.Data {
-	public class ReddDataEntries : IReadOnlyList<ReddDataEntry> {
+	public class ReddDataEntries : IReadOnlyList<ReddDataEntry>, INotifyCollectionChanged {
 		private readonly ReddIOEntries ioEntries;
 		private readonly List<ReddDataEntry> listEntries;
 		public ReddDataEntries(ReddIOEntries entries) {
@@ -19,7 +20,7 @@ namespace RedditImageScheduler.Data {
 		public ReddDataEntry this[uint index] => listEntries[(int)index];
 
 		public ReddDataEntry Create() {
-			ReddDataEntry entry = Add(string.Empty, string.Empty, DateTime.Now.AddHours(8), null);
+			ReddDataEntry entry = Add(string.Empty, string.Empty, GetNextTime(), null);
 			return entry;
 		}
 		
@@ -44,7 +45,7 @@ namespace RedditImageScheduler.Data {
 				ioEntries.Update(entry);
 			}
 
-			ReddUtilBitmaps.Add(entry);
+			ReddUtilBitmaps.Add(entry.Id, entry.Image);
 		}
 
 		public void Remove(ReddDataEntry entry) {
@@ -64,6 +65,26 @@ namespace RedditImageScheduler.Data {
 		IEnumerator IEnumerable.GetEnumerator() => listEntries.GetEnumerator();
 
 		// ===============================================
+		// NON-PUBLIC METHODS
+		protected DateTime GetNextTime() {
+			long timestamp = 0;
+			ReddDataEntry target = null;
+			foreach( var entry in listEntries ) {
+				if( entry.Timestamp > timestamp ) {
+					target = entry;
+					timestamp = entry.Timestamp;
+				}
+			}
+
+			if( target == null ) {
+				return DateTime.Now.AddHours(ReddConfig.ENTRY_HOURS_SPACING);
+			}
+			else {
+				return target.Date.AddHours(ReddConfig.ENTRY_HOURS_SPACING);
+			}
+		}
+
+		// ===============================================
 		// EVENTS
 		public event ReddIOEntries.IOEntriesEvent OnUpdate {
 			add => ioEntries.OnUpdate += value;
@@ -73,6 +94,11 @@ namespace RedditImageScheduler.Data {
 		public event ReddIOEntries.IOEntriesEvent OnError {
 			add => ioEntries.OnError += value;
 			remove => ioEntries.OnError -= value;
+		}
+
+		public event NotifyCollectionChangedEventHandler CollectionChanged {
+			add => ioEntries.CollectionChanged += value;
+			remove => ioEntries.CollectionChanged -= value;
 		}
 	}
 }

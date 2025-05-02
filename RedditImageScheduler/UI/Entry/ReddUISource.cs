@@ -12,7 +12,6 @@ namespace RedditImageScheduler.UI.Entry {
 		public ReddUISource() {
 			colorDefault = BackgroundColor;
 			PlaceholderText = ReddLanguage.SOURCE;
-			AllowDrop = true;
 		}
 
 		public bool IsValid => isValid;
@@ -31,37 +30,10 @@ namespace RedditImageScheduler.UI.Entry {
 		// ===============================================
 		// EVENTS
 		public delegate void UITitleEvent();
-
 		public event UITitleEvent OnSourceChanged;
 
 		// ===============================================
 		// CALLBACKS
-		protected override void OnDragEnter(DragEventArgs e) {
-			base.OnDragEnter(e);
-			if( e.Data.ContainsUris ) {
-				e.Effects = DragEffects.Copy;
-			}
-			else {
-				e.Effects = DragEffects.None;
-			}
-		}
-
-		protected override void OnDragDrop(DragEventArgs e) {
-			base.OnDragDrop(e);
-			if( e.Data.ContainsUris ) {
-				Uri uri = e.Data.Uris[0];
-				if( uri.IsFile ) {
-					string url = ReddURLFileParser.GetUrl(uri);
-					if( url != null ) {
-						Text = url;
-					}
-				}
-				else if( uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps ) {
-					Text = uri.AbsoluteUri;
-				}
-			}
-		}
-
 		private void OnModify(object sender, EventArgs e) {
 			if( string.IsNullOrEmpty(Text) || !Uri.TryCreate(Text, UriKind.Absolute, out var uriResult)
 										   || (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps) ) {

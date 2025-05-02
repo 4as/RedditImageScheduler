@@ -29,6 +29,7 @@ namespace RedditImageScheduler {
 			ioDatabase.Open();
 			
 			reddTray.OnOpen += OnOpen;
+			reddTray.OnPreview += OnPreview;
 			reddTray.Initialize();
 			
 			isRunning = true;
@@ -49,6 +50,7 @@ namespace RedditImageScheduler {
 			ioDatabase.OnErrorChange -= OnDatabaseErrorChange;
 			ioDatabase.Close();
 			
+			reddTray.OnPreview -= OnPreview;
 			reddTray.OnOpen -= OnOpen;
 			reddTray.Dispose();
 			
@@ -57,8 +59,17 @@ namespace RedditImageScheduler {
 			Quit();
 		}
 
+		private void OnPreview() {
+			OnOpen();
+			reddMain.EditMode = false;
+		}
+
 		private void OnOpen() {
-			if( reddMain != null ) return;
+			if( reddMain != null ) {
+				reddMain.EditMode = true;
+				return;
+			}
+			
 			if( !ioDatabase.IsOpen ) {
 				ioDatabase.Open();
 				if(!ioDatabase.IsOpen) return;

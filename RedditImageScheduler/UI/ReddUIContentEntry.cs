@@ -3,6 +3,7 @@ using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Data;
 using RedditImageScheduler.UI.Entry;
+using RedditImageScheduler.Utils;
 
 namespace RedditImageScheduler.UI {
 	public class ReddUIContentEntry : DynamicLayout {
@@ -14,7 +15,8 @@ namespace RedditImageScheduler.UI {
 		private readonly ReddUIDate uiDate = new ReddUIDate();
 		private readonly ReddUIImage uiImage = new ReddUIImage();
 		private readonly ReddUIStatus uiStatus = new ReddUIStatus();
-		
+
+		private readonly ReddUtilDropHandler utilDrop = new ReddUtilDropHandler();
 		private ReddDataEntry dataEntry;
 
 		public ReddUIContentEntry() {
@@ -34,11 +36,12 @@ namespace RedditImageScheduler.UI {
 			Add(uiTitle);
 			Add(uiSource);
 			Add(uiDate);
-			AddCentered( uiImage, null, null, true, true, true, true);
+			AddCentered( uiImage );
 			Add(uiStatus);
 			
 			EndVertical();
-			
+
+			AllowDrop = true;
 			Visible = false;
 		}
 		
@@ -67,7 +70,7 @@ namespace RedditImageScheduler.UI {
 			uiTitle.Text = entry.Title;
 			uiSource.Text = entry.Source;
 			uiDate.Date = entry.Date;
-			uiImage.Set(dataEntry);
+			uiImage.Set(dataEntry.Bitmap);
 			
 			uiStatus.LastDate = entry.Date;
 			uiStatus.CurrentDate = entry.Date;
@@ -80,6 +83,10 @@ namespace RedditImageScheduler.UI {
 			uiDate.OnDateChanged += OnModify;
 			uiImage.OnImageChanged += OnModify;
 			uiSource.OnSourceChanged += OnModify;
+
+			utilDrop.OnDropFile += OnDropFile;
+			utilDrop.OnDropURL += OnDropURL;
+			utilDrop.OnDropImage += OnDropImage;
 			
 			Visible = true;
 		}
@@ -95,6 +102,10 @@ namespace RedditImageScheduler.UI {
 			etoSave.Click -= OnButtonSave;
 			etoDelete.Click -= OnButtonDelete;
 			
+			utilDrop.OnDropFile += OnDropFile;
+			utilDrop.OnDropURL += OnDropURL;
+			utilDrop.OnDropImage += OnDropImage;
+			
 			Visible = false;
 			dataEntry = null;
 		}
@@ -102,10 +113,10 @@ namespace RedditImageScheduler.UI {
 		public ReddDataEntry Commit() {
 			dataEntry.Title = uiTitle.Text;
 			dataEntry.Source = uiSource.Text;
-			dataEntry.Image = uiImage.ToByteArray();
+			dataEntry.Bitmap = uiImage.Bitmap;
 			dataEntry.Date = uiDate.Date;
 			dataEntry.IsValid = IsValid;
-			uiImage.Set(dataEntry);
+			uiImage.Set(dataEntry.Bitmap);
 			uiStatus.HasChanges = false;
 			return dataEntry;
 		}
@@ -121,6 +132,28 @@ namespace RedditImageScheduler.UI {
 		protected override void OnSizeChanged(EventArgs e) {
 			base.OnSizeChanged(e);
 			OnAlign();
+		}
+
+		protected override void OnDragEnter(DragEventArgs e) {
+			base.OnDragEnter(e);
+			utilDrop.HandleStart(e);
+		}
+
+		protected override void OnDragDrop(DragEventArgs e) {
+			base.OnDragDrop(e);
+			utilDrop.HandleDrop(e);
+		}
+		
+		protected void OnDropFile(string filepath) {
+			uiImage.Set(filepath);
+		}
+
+		protected void OnDropURL(string url) {
+			uiSource.Text = url;
+		}
+
+		protected void OnDropImage(Image image) {
+			uiImage.Set(image);
 		}
 
 		protected void OnAlign() {

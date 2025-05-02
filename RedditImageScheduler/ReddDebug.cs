@@ -6,6 +6,7 @@ namespace RedditImageScheduler {
 	public static class ReddDebug {
 		public static ReddUIConsole CONSOLE;
 
+		public static void Trace<T>(T o) => Trace(o.ToString());
 		public static void Trace(string text) {
 			if( CONSOLE == null ) {
 				CONSOLE = new ReddUIConsole();
@@ -17,6 +18,8 @@ namespace RedditImageScheduler {
 			}
 			CONSOLE.Write(text);
 		}
+
+		
 
 		private static void OnClose(object sender, EventArgs e) {
 			Application.Instance.Terminating -= OnClose;
