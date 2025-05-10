@@ -3,7 +3,7 @@ using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Utils;
 
-namespace RedditImageScheduler.UI.Entry {
+namespace RedditImageScheduler.UI.Editor {
 	public class ReddUISource : TextBox {
 		
 		private readonly Color colorDefault;
@@ -11,11 +11,17 @@ namespace RedditImageScheduler.UI.Entry {
 
 		public ReddUISource() {
 			colorDefault = BackgroundColor;
-			PlaceholderText = ReddLanguage.SOURCE;
+			PlaceholderText = ReddLanguage.TEXT_PLACEHOLDER_SOURCE;
 		}
 
 		public bool IsValid => isValid;
+		
+		// ===============================================
+		// PUBLIC METHODS
+		public void Refresh() => OnValidate();
 
+		// ===============================================
+		// NON-PUBLIC METHODS
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
 			TextChanged += OnModify;
@@ -34,17 +40,19 @@ namespace RedditImageScheduler.UI.Entry {
 
 		// ===============================================
 		// CALLBACKS
-		private void OnModify(object sender, EventArgs e) {
-			if( string.IsNullOrEmpty(Text) || !Uri.TryCreate(Text, UriKind.Absolute, out var uriResult)
-										   || (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps) ) {
-				isValid = false;
-				BackgroundColor = ReddConfig.UI_BG_INVALID;
-			}
-			else {
+		private void OnValidate() {
+			if( ReddValidator.IsValidSource(Text) ) {
 				isValid = true;
 				BackgroundColor = colorDefault;
 			}
-
+			else {
+				isValid = false;
+				BackgroundColor = ReddConfig.UI_BG_INVALID;
+			}
+		}
+		
+		private void OnModify(object sender, EventArgs e) {
+			OnValidate();
 			OnSourceChanged?.Invoke();
 		}
 	}

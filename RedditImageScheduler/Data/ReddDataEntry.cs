@@ -23,6 +23,9 @@ namespace RedditImageScheduler.Data {
 		[Column(nameof(Image))]
 		public byte[] Image { get; set; }
 		
+		[Column(nameof(IsPosted))]
+		public bool IsPosted { get; set; }
+		
 		[Column(nameof(IsValid))]
 		public bool IsValid { get; set; }
 
@@ -37,12 +40,26 @@ namespace RedditImageScheduler.Data {
 			get => new ReddUtilBitmap(Id, Image);
 			set => Image = value.ToByteArray();
 		}
+		
+		[Ignore] public bool HasValidTitle => ReddValidator.IsValidTitle(Title);
+		[Ignore] public bool HasValidSource => ReddValidator.IsValidSource(Source);
+		[Ignore] public bool HasValidImage => ReddValidator.IsValidImage(Image);
+		[Ignore] public bool HasValidDate => ReddValidator.IsValidDate(Date);
+		[Ignore] public ReddDateState State => new ReddDateState(this);
+
+		public void Validate() {
+#if DEBUG
+			IsPosted = false;
+#endif
+			IsValid = HasValidTitle && HasValidSource && HasValidImage && HasValidDate;
+		}
 
 		private readonly StringBuilder sBuilder = new StringBuilder();
 		public override string ToString() {
 			sBuilder.Clear();
-			sBuilder.Append('"').Append(Title).Append('"');
-			sBuilder.Append(" : ").Append(Source);
+			sBuilder.Append(Id).Append(": ");
+			sBuilder.Append(Title);
+			//sBuilder.Append(" : ").Append(Source);
 			return sBuilder.ToString();
 		}
 	}

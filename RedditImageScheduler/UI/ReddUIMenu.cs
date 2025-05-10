@@ -42,6 +42,11 @@ namespace RedditImageScheduler.UI {
 		}
 
 		// ===============================================
+		// EVENTS
+		public delegate void UIMenuEvent();
+		public event UIMenuEvent EventQuit;
+
+		// ===============================================
 		// CALLBACKS
 		protected void OnOptions(object sender, EventArgs e) {
 			//TODO: open options dialog
@@ -57,7 +62,7 @@ namespace RedditImageScheduler.UI {
 		}
 		
 		protected void OnQuit(object sender, EventArgs e) {
-			Application.Instance.Quit();
+			EventQuit?.Invoke();
 		}
 	}
 }

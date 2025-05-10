@@ -2,13 +2,13 @@ using System;
 using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Data;
-using RedditImageScheduler.UI.Entry;
 using RedditImageScheduler.Utils;
 
-namespace RedditImageScheduler.UI {
-	public class ReddUIContentEntry : DynamicLayout {
+namespace RedditImageScheduler.UI.Editor {
+	public class ReddUIEntryEdit : DynamicLayout {
 		private readonly DynamicLayout etoButtons = new DynamicLayout();
 		private readonly Button etoSave = new Button();
+		private readonly Label etoConfirm = new Label();
 		private readonly Button etoDelete = new Button();
 		private readonly ReddUITitle uiTitle = new ReddUITitle();
 		private readonly ReddUISource uiSource = new ReddUISource();
@@ -19,16 +19,21 @@ namespace RedditImageScheduler.UI {
 		private readonly ReddUtilDropHandler utilDrop = new ReddUtilDropHandler();
 		private ReddDataEntry dataEntry;
 
-		public ReddUIContentEntry() {
+		public ReddUIEntryEdit() {
 			Spacing = new Size(2, 2);
+			Padding = new Padding(2);
 			
 			BeginVertical();
 			
 			etoButtons.BeginHorizontal();
-			etoSave.Text = ReddLanguage.SAVE;
+			etoSave.Text = ReddLanguage.BUTTON_SAVE;
 			etoButtons.Add(etoSave);
 			etoButtons.AddSpace();
-			etoDelete.Text = ReddLanguage.REMOVE;
+			etoConfirm.Visible = false;
+			etoConfirm.VerticalAlignment = VerticalAlignment.Center;
+			etoConfirm.Text = ReddLanguage.TEXT_CONFIRM_DELETE;
+			etoButtons.Add(etoConfirm);
+			etoDelete.Text = ReddLanguage.BUTTON_REMOVE;
 			etoButtons.Add(etoDelete);
 			etoButtons.EndHorizontal();
 			
@@ -36,7 +41,7 @@ namespace RedditImageScheduler.UI {
 			Add(uiTitle);
 			Add(uiSource);
 			Add(uiDate);
-			AddCentered( uiImage );
+			AddCentered( uiImage, new Padding(2), new Size(2,2), true, true );
 			Add(uiStatus);
 			
 			EndVertical();
@@ -47,7 +52,13 @@ namespace RedditImageScheduler.UI {
 		
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
+			MouseUp += OnMousePress;
 			OnAlign();
+		}
+
+		protected override void OnUnLoad(EventArgs e) {
+			MouseUp -= OnMousePress;
+			base.OnUnLoad(e);
 		}
 
 		// ===============================================
@@ -69,11 +80,14 @@ namespace RedditImageScheduler.UI {
 			
 			uiTitle.Text = entry.Title;
 			uiSource.Text = entry.Source;
+#if DEBUG
+			uiDate.Date = DateTime.Now.AddSeconds(10);
+#else
 			uiDate.Date = entry.Date;
+#endif
 			uiImage.Set(dataEntry.Bitmap);
 			
-			uiStatus.LastDate = entry.Date;
-			uiStatus.CurrentDate = entry.Date;
+			uiStatus.Date = entry.Date;
 			OnValidate();
 			
 			etoSave.Click += OnButtonSave;
@@ -83,6 +97,7 @@ namespace RedditImageScheduler.UI {
 			uiDate.OnDateChanged += OnModify;
 			uiImage.OnImageChanged += OnModify;
 			uiSource.OnSourceChanged += OnModify;
+			OnModify();
 
 			utilDrop.OnDropFile += OnDropFile;
 			utilDrop.OnDropURL += OnDropURL;
@@ -115,23 +130,25 @@ namespace RedditImageScheduler.UI {
 			dataEntry.Source = uiSource.Text;
 			dataEntry.Bitmap = uiImage.Bitmap;
 			dataEntry.Date = uiDate.Date;
-			dataEntry.IsValid = IsValid;
 			uiImage.Set(dataEntry.Bitmap);
 			uiStatus.HasChanges = false;
 			return dataEntry;
 		}
 
+		public void Refresh() => OnValidate();
+
 		// ===============================================
 		// EVENTS
 		public delegate void UIEntryEvent();
-		public event UIEntryEvent OnSave;
-		public event UIEntryEvent OnDelete;
+		public event UIEntryEvent EventSave;
+		public event UIEntryEvent EventDelete;
 
 		// ===============================================
 		// CALLBACKS
 		protected override void OnSizeChanged(EventArgs e) {
 			base.OnSizeChanged(e);
 			OnAlign();
+			OnClearConfirm();
 		}
 
 		protected override void OnDragEnter(DragEventArgs e) {
@@ -142,6 +159,7 @@ namespace RedditImageScheduler.UI {
 		protected override void OnDragDrop(DragEventArgs e) {
 			base.OnDragDrop(e);
 			utilDrop.HandleDrop(e);
+			OnClearConfirm();
 		}
 		
 		protected void OnDropFile(string filepath) {
@@ -160,15 +178,20 @@ namespace RedditImageScheduler.UI {
 			uiTitle.Width = Width;
 			uiSource.Width = Width;
 			uiStatus.Width = Width;
-			int height = Height - (uiTitle.Height + uiSource.Height + uiDate.Height + uiStatus.Height + etoButtons.Height);
+			int height = Height - (uiTitle.Height + uiSource.Height + uiDate.Height + uiStatus.Height + etoButtons.Height + (Spacing.GetValueOrDefault().Height * 2));
 			int size = Width < height ? Width : height;
 			uiImage.Size = new Size(size, size);
 		}
 
 		protected void OnValidate() {
+			uiStatus.Date = uiDate.Date;
+			uiTitle.Refresh();
 			uiStatus.HasValidTitle = uiTitle.IsValid;
+			uiSource.Refresh();
 			uiStatus.HasValidSource = uiSource.IsValid;
+			uiDate.Refresh();
 			uiStatus.HasValidDate = uiDate.IsValid;
+			uiImage.Refresh();
 			uiStatus.HasValidImage = uiImage.IsValid;
 		}
 		
@@ -177,15 +200,38 @@ namespace RedditImageScheduler.UI {
 								  uiSource.Text != dataEntry.Source ||
 								  uiDate.Date != dataEntry.Date ||
 								  uiImage.HasChanged;
+			etoSave.Visible = uiStatus.HasChanges;
 			OnValidate();
 		}
 		
 		private void OnButtonSave(object sender, EventArgs e) {
-			OnSave?.Invoke();
+			EventSave?.Invoke();
 		}
 
 		private void OnButtonDelete(object sender, EventArgs e) {
-			OnDelete?.Invoke();
+			if( etoConfirm.Visible ) {
+				OnClearConfirm();
+				EventDelete?.Invoke();
+			}
+			else {
+				etoConfirm.Visible = true;
+				etoDelete.TextColor = ReddConfig.UI_TEXT_IMPORTANT;
+				etoDelete.LostFocus += OnDeleteUnfocus;
+			}
+		}
+
+		private void OnDeleteUnfocus(object sender, EventArgs e) {
+			OnClearConfirm();
+		}
+
+		private void OnMousePress(object sender, MouseEventArgs e) {
+			OnClearConfirm();
+		}
+
+		private void OnClearConfirm() {
+			etoConfirm.Visible = false;
+			etoDelete.TextColor = SystemColors.ControlText;
+			etoDelete.LostFocus -= OnDeleteUnfocus;
 		}
 	}
 }

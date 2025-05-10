@@ -1,19 +1,26 @@
 using System;
 using Eto.Drawing;
 using Eto.Forms;
+using RedditImageScheduler.Utils;
 
-namespace RedditImageScheduler.UI.Entry {
+namespace RedditImageScheduler.UI.Editor {
 	public class ReddUITitle : TextBox {
 		private readonly Color colorDefault;
 		private bool isValid;
 
 		public ReddUITitle() {
 			colorDefault = BackgroundColor;
-			PlaceholderText = ReddLanguage.TITLE;
+			PlaceholderText = ReddLanguage.TEXT_PLACEHOLDER_TITLE;
 		}
 		
 		public bool IsValid => isValid;
 		
+		// ===============================================
+		// PUBLIC METHODS
+		public void Refresh() => OnValidate();
+
+		// ===============================================
+		// NON-PUBLIC METHODS
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
 			TextChanged += OnModify;
@@ -32,15 +39,18 @@ namespace RedditImageScheduler.UI.Entry {
 		
 		// ===============================================
 		// CALLBACKS
-		private void OnModify(object sender, EventArgs e) {
-			if( string.IsNullOrEmpty(Text) || Text.Length < ReddConfig.ENTRY_TITLE_LENGTH ) {
-				isValid = false;
-				BackgroundColor = ReddConfig.UI_BG_INVALID;
-			}
-			else {
+		private void OnValidate() {
+			if( ReddValidator.IsValidTitle(Text) ) {
 				isValid = true;
 				BackgroundColor = colorDefault;
 			}
+			else {
+				isValid = false;
+				BackgroundColor = ReddConfig.UI_BG_INVALID;
+			}
+		}
+		private void OnModify(object sender, EventArgs e) {
+			OnValidate();
 			OnTitleChanged?.Invoke();
 		}
 	}

@@ -9,26 +9,25 @@ namespace RedditImageScheduler {
 		private readonly TrayIndicator formTray;
 		private readonly ButtonMenuItem menuDebug = new ButtonMenuItem();
 		private readonly ReddUIMenuItem commandOpen;
-		private readonly ReddUIMenuItem commandTimetable;
 		private readonly ReddUIMenuItem commandQuit;
 		public RedditTray() {
 			commandOpen = new ReddUIMenuItem() { Text = ReddLanguage.MENU_EDIT };
-			commandTimetable = new ReddUIMenuItem() { Text = ReddLanguage.MENU_TIMETABLE };
 			commandQuit = new ReddUIMenuItem() { Text = ReddLanguage.MENU_QUIT };
 			
 			formTray = new TrayIndicator() {
 				Image = SystemIcons.GetStaticIcon(StaticIconType.OpenDirectory, IconSize.Large),
 				Title = ReddLanguage.APP_NAME,
 				Visible = true,
-				Menu = new ContextMenu() {
-					Items = { commandOpen, commandTimetable, commandQuit }
-				}
+				Menu = new ContextMenu()
 			};
 			
 #if DEBUG
 			menuDebug.Enabled = false;
 			formTray.Menu.Items.Add(menuDebug);
 #endif
+			
+			formTray.Menu.Items.Add(commandOpen);
+			formTray.Menu.Items.Add(commandQuit);
 		}
 
 		public TrayIndicator UI => formTray;
@@ -39,7 +38,6 @@ namespace RedditImageScheduler {
 			formTray.Activated += OnActivation;
 			formTray.Menu.Opening += OnMenu;
 			commandQuit.Click += OnQuitting;
-			commandTimetable.Click += OnTimetable;
 		}
 
 		public void Deinitialize() {
@@ -47,7 +45,6 @@ namespace RedditImageScheduler {
 			formTray.Activated -= OnActivation;
 			formTray.Menu.Opening -= OnMenu;
 			commandQuit.Click -= OnQuitting;
-			commandTimetable.Click -= OnTimetable;
 		}
 
 		public void Dispose() {
@@ -55,22 +52,16 @@ namespace RedditImageScheduler {
 			formTray.Hide();
 			formTray.Dispose();
 		}
-
 		
-
-		public event Action OnOpen;
-		public event Action OnPreview;
+		public event Action EventOpen;
+		public event Action EventQuit;
 
 		private void OnActivation(object sender, EventArgs e) {
-			OnOpen?.Invoke();
-		}
-		
-		private void OnTimetable(object sender, EventArgs e) {
-			OnPreview?.Invoke();
+			EventOpen?.Invoke();
 		}
 
 		private void OnQuitting(object sender, EventArgs e) {
-			Application.Instance.Quit();
+			EventQuit?.Invoke();
 		}
 		
 		private void OnMenu(object sender, EventArgs e) {

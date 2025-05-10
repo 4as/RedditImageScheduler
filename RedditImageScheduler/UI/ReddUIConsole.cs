@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Text;
 using Eto.Drawing;
 using Eto.Forms;
 
 namespace RedditImageScheduler.UI {
 	public class ReddUIConsole : Form {
+		private readonly List<string> listEntries = new List<string>();
 		private readonly TextArea etoText = new TextArea();
 		private readonly StringBuilder stringBuilder = new StringBuilder();
 		public ReddUIConsole() {
@@ -17,7 +19,16 @@ namespace RedditImageScheduler.UI {
 		}
 
 		public void Write(string text) {
-			stringBuilder.AppendLine(text);
+			listEntries.Add(text);
+			if( listEntries.Count > 100 ) {
+				listEntries.RemoveAt(0);
+			}
+
+			stringBuilder.Clear();
+			for( int i = 0, iLen = listEntries.Count; i < iLen; i++ ) {
+				stringBuilder.AppendLine(listEntries[i]);
+			}
+			
 			etoText.Text = stringBuilder.ToString();
 		}
 	}

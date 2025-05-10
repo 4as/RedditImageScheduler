@@ -1,19 +1,19 @@
-using System;
 using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Data;
 
 namespace RedditImageScheduler.UI.Timetable {
-	public class ReddUISchedule : GridView {
+	public class ReddUITimeGrid : GridView {
 		private readonly GridColumn etoColumn = new GridColumn();
-		
-		public ReddUISchedule() {
+		private readonly GridEntry uiEntry = new GridEntry();
+
+		public ReddUITimeGrid() {
 			ShowHeader = false;
 			GridLines = GridLines.Horizontal;
 			AllowColumnReordering = false;
 			AllowEmptySelection = false;
 			AllowMultipleSelection = false;
-			etoColumn.DataCell = new GridEntry();
+			etoColumn.DataCell = uiEntry;
 			etoColumn.AutoSize = true;
 			etoColumn.Editable = false;
 			etoColumn.MinWidth = 300;
@@ -23,8 +23,9 @@ namespace RedditImageScheduler.UI.Timetable {
 			Columns.Add(etoColumn);
 		}
 
-		protected override void OnSizeChanged(EventArgs e) {
-			base.OnSizeChanged(e);
+		public ReddDataEntry CurrentNext {
+			get => uiEntry.CurrentNext;
+			set => uiEntry.CurrentNext = value;
 		}
 
 		private class GridEntry : DrawableCell {
@@ -32,6 +33,8 @@ namespace RedditImageScheduler.UI.Timetable {
 			private readonly SolidBrush drawBrushDefault = new SolidBrush(Colors.Black);
 			private readonly FormattedText drawTextSelected = new FormattedText();
 			private readonly SolidBrush drawBrushSelected = new SolidBrush(Colors.White);
+
+			public ReddDataEntry CurrentNext;
 
 			public GridEntry() {
 				drawTextDefault.Alignment = FormattedTextAlignment.Left;
@@ -56,21 +59,27 @@ namespace RedditImageScheduler.UI.Timetable {
 				PointF pos = bounds.Location;
 				
 				if( e.IsSelected ) {
-					g.FillRectangle(new Color(0f, 0f, 1f, 1f), bounds);
+					g.FillRectangle(ReddConfig.UI_BG_SELECTED, bounds);
 
-					drawTextSelected.Text = entry.ToString();
+					drawTextSelected.Text = string.IsNullOrEmpty(entry.Title) ? ReddLanguage.TEXT_NO_TITLE : entry.Title;
 					pos.Y += bounds.Height / 2 - drawTextSelected.Measure().Height / 2;
 					g.DrawText(drawTextSelected, pos);
 				}
 				else {
-					if( entry.IsValid ) {
-						g.FillRectangle(new Color(1f, 1f, 1f, 1f), bounds);
+					if( entry == CurrentNext ) {
+						g.FillRectangle(ReddConfig.UI_BG_NEXT, bounds);
+					}
+					else if( entry.IsPosted ) {
+						g.FillRectangle(ReddConfig.UI_BG_POSTED, bounds);
+					}
+					else if( entry.IsValid ) {
+						g.FillRectangle(ReddConfig.UI_BG_DEFAULT, bounds);
 					}
 					else {
 						g.FillRectangle(ReddConfig.UI_BG_INVALID, bounds);
 					}
 
-					drawTextDefault.Text = entry.ToString();
+					drawTextDefault.Text = string.IsNullOrEmpty(entry.Title) ? ReddLanguage.TEXT_NO_TITLE : entry.Title;
 					
 					float bh = bounds.Height / 2f;
 					float th = drawTextDefault.Measure().Height / 2f;

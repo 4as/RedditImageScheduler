@@ -12,6 +12,11 @@ namespace RedditImageScheduler.Data {
 		public ReddDataEntries(ReddIOEntries entries) {
 			ioEntries = entries;
 			listEntries = entries.GetAll();
+
+			foreach( var entry in listEntries ) {
+				entry.Validate();
+				Update(entry);
+			}
 		}
 		
 		public int Count => listEntries.Count;
@@ -19,8 +24,8 @@ namespace RedditImageScheduler.Data {
 		public ReddDataEntry this[int index] => listEntries[index];
 		public ReddDataEntry this[uint index] => listEntries[(int)index];
 
-		public ReddDataEntry Create() {
-			ReddDataEntry entry = Add(string.Empty, string.Empty, GetNextTime(), null);
+		public ReddDataEntry Create(uint hours_spacing) {
+			ReddDataEntry entry = Add(string.Empty, string.Empty, FindNextTime(hours_spacing), null);
 			return entry;
 		}
 		
@@ -36,6 +41,8 @@ namespace RedditImageScheduler.Data {
 		}
 
 		public void Update(ReddDataEntry entry) {
+			entry.Validate();
+			
 			int idx = listEntries.IndexOf(entry);
 			if( idx == -1 ) {
 				listEntries.Add(entry);
@@ -48,6 +55,29 @@ namespace RedditImageScheduler.Data {
 			ReddUtilBitmaps.Add(entry.Id, entry.Image);
 		}
 
+		public void Consume(ReddDataEntry entry) {
+			int idx = listEntries.IndexOf(entry);
+			if( idx != -1 ) {
+				ReddDebug.Trace("Consuming entry: " + entry.Title);
+				entry.IsPosted = true;
+				ioEntries.Update(entry);
+			}
+		}
+
+		public void Trim(uint days_old) {
+			for( int i = listEntries.Count - 1; i > -1; i-- ) {
+				ReddDataEntry entry = listEntries[i];
+				if( entry.IsPosted ) {
+					var diff = DateTime.Now - entry.Date;
+					if( diff.Days > days_old ) {
+						ReddDebug.Trace("Trimming away entry: " + entry.Title);
+						listEntries.RemoveAt(i);
+						ioEntries.Remove(entry);
+					}
+				}
+			}
+		}
+
 		public void Remove(ReddDataEntry entry) {
 			int idx = listEntries.IndexOf(entry);
 			if( idx == -1 ) return;
@@ -57,6 +87,15 @@ namespace RedditImageScheduler.Data {
 			ioEntries.Remove(entry);
 		}
 
+		public int IndexOf(uint entry_id) {
+			for( int i = listEntries.Count - 1; i > -1; i-- ) {
+				ReddDataEntry entry = listEntries[i];
+				if( entry.Id == entry_id ) return i;
+			}
+
+			return -1;
+		}
+		
 		public int IndexOf(ReddDataEntry entry) {
 			return listEntries.IndexOf(entry);
 		}
@@ -66,7 +105,7 @@ namespace RedditImageScheduler.Data {
 
 		// ===============================================
 		// NON-PUBLIC METHODS
-		protected DateTime GetNextTime() {
+		protected DateTime FindNextTime(uint hours_spacing) {
 			long timestamp = 0;
 			ReddDataEntry target = null;
 			foreach( var entry in listEntries ) {
@@ -76,12 +115,16 @@ namespace RedditImageScheduler.Data {
 				}
 			}
 
+#if DEBUG
+			return DateTime.Now.AddMinutes(1);
+#else
 			if( target == null ) {
-				return DateTime.Now.AddHours(ReddConfig.ENTRY_HOURS_SPACING);
+				return DateTime.Now.AddHours(hours_spacing);
 			}
 			else {
-				return target.Date.AddHours(ReddConfig.ENTRY_HOURS_SPACING);
+				return target.Date.AddHours(hours_spacing);
 			}
+#endif
 		}
 
 		// ===============================================

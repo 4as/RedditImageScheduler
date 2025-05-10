@@ -1,6 +1,4 @@
-using System.IO;
 using Eto.Drawing;
-using RedditImageScheduler.Data;
 
 namespace RedditImageScheduler.Utils {
 	public readonly struct ReddUtilBitmap {
@@ -34,7 +32,7 @@ namespace RedditImageScheduler.Utils {
 		public static implicit operator ReddUtilBitmap(Image image) => new ReddUtilBitmap(image);
 
 		public byte[] ToByteArray() {
-			return bmpBitmap.ToByteArray(ImageFormat.Png);
+			return bmpBitmap?.ToByteArray(ImageFormat.Png);
 		}
 
 		public static ImageFormat GetImageFormat(string extension) {

@@ -2,8 +2,9 @@ using System;
 using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
+using RedditImageScheduler.Utils;
 
-namespace RedditImageScheduler.UI.Entry {
+namespace RedditImageScheduler.UI.Editor {
 	public class ReddUIDate : DynamicLayout {
 		private readonly Label etoLabelDate = new Label();
 		private readonly DateTimePicker etoPicker = new DateTimePicker();
@@ -21,15 +22,14 @@ namespace RedditImageScheduler.UI.Entry {
 			BeginHorizontal();
 			
 			etoLabelDate.VerticalAlignment = VerticalAlignment.Center;
-			etoLabelDate.Text = ReddLanguage.DATE;
+			etoLabelDate.Text = ReddLanguage.LABEL_DATE;
 			Add(etoLabelDate);
 			
 			etoPicker.Mode = DateTimePickerMode.Date;
-			etoPicker.MinDate = DateTime.Today;
 			Add(etoPicker);
 			
 			etoLabelHours.VerticalAlignment = VerticalAlignment.Center;
-			etoLabelHours.Text = ReddLanguage.HOUR;
+			etoLabelHours.Text = ReddLanguage.LABEL_HOUR;
 			Add(etoLabelHours);
 			
 			etoHours.Increment = 1;
@@ -60,16 +60,24 @@ namespace RedditImageScheduler.UI.Entry {
 		// GETTERS / SETTERS
 		public DateTime Date {
 			get {
+#if DEBUG
+				return etoPicker.Value.GetValueOrDefault();
+#else
 				DateTime date = etoPicker.Value.GetValueOrDefault();
 				return new DateTime(date.Year, date.Month, date.Day, (int)etoHours.Value, date.Minute, 0, date.Kind);
+#endif
 			}
 			set {
-				etoPicker.Value = value;
 				etoHours.Value = value.Hour;
+				etoPicker.Value = value;
 			}
 		}
 
-		public bool IsValid => Date > DateTime.Now;
+		public bool IsValid => ReddValidator.IsValidDate(Date);
+
+		// ===============================================
+		// PUBLIC METHODS
+		public void Refresh() => OnValidate();
 
 		// ===============================================
 		// EVENTS

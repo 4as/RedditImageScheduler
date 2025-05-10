@@ -3,10 +3,9 @@ using System.IO;
 using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
-using RedditImageScheduler.Data;
 using RedditImageScheduler.Utils;
 
-namespace RedditImageScheduler.UI.Entry {
+namespace RedditImageScheduler.UI.Editor {
 	public class ReddUIImage : ImageView {
 		private static readonly Icon ICON_PLACEHOLDER = Icon.FromResource("RedditImageScheduler.Resources.drop_icon.png", Assembly.GetExecutingAssembly());
 
@@ -84,13 +83,14 @@ namespace RedditImageScheduler.UI.Entry {
 			SetImage(new ReddUtilBitmap(image));
 			hasChanged = true;
 		}
+
+		public void Refresh() => OnValidate();
 		
 		public byte[] ToByteArray() => utilBitmap.ToByteArray();
 
 		// ===============================================
 		// NON-PUBLIC METHODS
-		private void SetImage(ReddUtilBitmap bitmap) {
-			utilBitmap = bitmap;
+		private void OnValidate() {
 			if( utilBitmap.Bitmap == null ) {
 				Image = ICON_PLACEHOLDER;
 				BackgroundColor = ReddConfig.UI_BG_DEFAULT;
@@ -99,7 +99,11 @@ namespace RedditImageScheduler.UI.Entry {
 				Image = utilBitmap.Bitmap;
 				BackgroundColor = ReddConfig.UI_BG_EMPTY;
 			}
-
+		}
+		
+		private void SetImage(ReddUtilBitmap bitmap) {
+			utilBitmap = bitmap;
+			OnValidate();
 			OnImageChanged?.Invoke();
 		}
 

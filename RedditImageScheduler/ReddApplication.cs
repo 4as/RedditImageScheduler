@@ -2,10 +2,13 @@ using System;
 using System.ComponentModel;
 using Eto.Forms;
 using RedditImageScheduler.IO;
+using RedditImageScheduler.Scheduler;
 
 namespace RedditImageScheduler {
 	public class ReddApplication : Application {
+		private readonly ReddIOOptions ioOptions;
 		private readonly ReddIODatabase ioDatabase;
+		private readonly ReddScheduler reddScheduler;
 		private readonly RedditTray reddTray;
 			
 		private ReddMain reddMain;
@@ -13,7 +16,9 @@ namespace RedditImageScheduler {
 
 		public ReddApplication(string platform)
 			: base(platform) {
-			ioDatabase = new ReddIODatabase(ReddConfig.FILE);
+			ioOptions = new ReddIOOptions(ReddConfig.FILE_SETTINGS);
+			ioDatabase = new ReddIODatabase();
+			reddScheduler = new ReddScheduler(ioOptions.Data);
 			reddTray = new RedditTray();
 		}
 
@@ -23,14 +28,19 @@ namespace RedditImageScheduler {
 
 		protected override void OnInitialized(EventArgs e) {
 			base.OnInitialized(e);
+
+			ioOptions.EventError += OnOptionsError;
+			ioOptions.Load();
 			
-			ioDatabase.OnErrorInitialize += OnDatabaseErrorInitialize;
-			ioDatabase.OnErrorChange += OnDatabaseErrorChange;
-			ioDatabase.Open();
+			ioDatabase.EventErrorInitialize += OnDatabaseErrorInitialize;
+			ioDatabase.EventErrorChange += OnDatabaseErrorChange;
+			ioDatabase.Open(ioOptions.DatabasePath);
 			
-			reddTray.OnOpen += OnOpen;
-			reddTray.OnPreview += OnPreview;
+			reddTray.EventOpen += OnOpen;
+			reddTray.EventQuit += OnQuit;
 			reddTray.Initialize();
+
+			reddScheduler.Initialize(ioDatabase.Entries);
 			
 			isRunning = true;
 #if DEBUG
@@ -46,36 +56,34 @@ namespace RedditImageScheduler {
 			if( isRunning ) return;
 #endif
 			
-			ioDatabase.OnErrorInitialize -= OnDatabaseErrorInitialize;
-			ioDatabase.OnErrorChange -= OnDatabaseErrorChange;
+			ioOptions.EventError -= OnOptionsError;
+			
+			ioDatabase.EventErrorInitialize -= OnDatabaseErrorInitialize;
+			ioDatabase.EventErrorChange -= OnDatabaseErrorChange;
 			ioDatabase.Close();
 			
-			reddTray.OnPreview -= OnPreview;
-			reddTray.OnOpen -= OnOpen;
+			reddTray.EventOpen -= OnOpen;
+			reddTray.EventQuit -= OnQuit;
 			reddTray.Dispose();
+
+			reddScheduler.Deinitialize();
 			
 			base.OnTerminating(e);
 
 			Quit();
 		}
 
-		private void OnPreview() {
-			OnOpen();
-			reddMain.EditMode = false;
-		}
-
 		private void OnOpen() {
 			if( reddMain != null ) {
-				reddMain.EditMode = true;
 				return;
 			}
 			
 			if( !ioDatabase.IsOpen ) {
-				ioDatabase.Open();
+				ioDatabase.Open(ioOptions.DatabasePath);
 				if(!ioDatabase.IsOpen) return;
 			}
 
-			reddMain = new ReddMain(ioDatabase);
+			reddMain = new ReddMain(reddScheduler, ioOptions.Data);
 			reddMain.Show();
 			reddMain.Closed += OnClose;
 		}
@@ -85,13 +93,22 @@ namespace RedditImageScheduler {
 			if( !reddMain.IsDisposed ) reddMain.Dispose();
 			reddMain = null;
 		}
+
+		private void OnQuit() {
+			if( reddMain != null && reddMain.HasChanges && !reddMain.ShowSaveWarning() ) return;
+			Application.Instance.Quit();
+		}
+		
+		private void OnOptionsError() {
+			MessageBox.Show(string.Format(ReddLanguage.ERROR_SETTINGS_LOAD_FAILED, ioOptions.FilePath), MessageBoxType.Error); 
+		}
 		
 		private void OnDatabaseErrorInitialize() {
-			MessageBox.Show("Failed to access '" + ioDatabase.FilePath + ".' Make sure the current folder can be read from and written to.", MessageBoxType.Error); 
+			MessageBox.Show(string.Format(ReddLanguage.ERROR_DATABASE_INITIALIZATION_FAILED, ioDatabase.FilePath), MessageBoxType.Error); 
 		}
 		
 		private void OnDatabaseErrorChange() {
-			MessageBox.Show("Failed to modify the database. Is '"+ioDatabase.FilePath+"' still accessible?", MessageBoxType.Error); 
+			MessageBox.Show(string.Format(ReddLanguage.ERROR_DATABASE_MODIFY_FAILED, ioDatabase.FilePath), MessageBoxType.Error); 
 		}
 	}
 }

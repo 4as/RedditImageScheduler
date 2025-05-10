@@ -5,14 +5,9 @@ using SQLite;
 
 namespace RedditImageScheduler.IO {
 	public class ReddIODatabase {
-		private readonly string sFile;
-
 		private SQLiteConnection sqlConnection;
 		private ReddIOEntries ioEntries;
-
-		public ReddIODatabase(string file) {
-			sFile = file;
-		}
+		private string sFile;
 
 		// ================================================================================
 		// GETTERS / SETTERS
@@ -23,14 +18,16 @@ namespace RedditImageScheduler.IO {
 
 		// ================================================================================
 		// PUBLIC
-		public void Open() {
+		public void Open(string filepath) {
 			try {
-				SQLiteConnectionString options = new SQLiteConnectionString(sFile, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite, true);
+				SQLiteConnectionString options = new SQLiteConnectionString(filepath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite, true);
 				sqlConnection = new SQLiteConnection(options);
 				
 				//sqlConnection.DropTable<ReddDataEntry>();
 				
 				sqlConnection.CreateTable<ReddDataEntry>();
+
+				sFile = filepath;
 				
 				ioEntries = new ReddIOEntries(sqlConnection);
 				ioEntries.OnError += OnEntriesError;
@@ -38,7 +35,7 @@ namespace RedditImageScheduler.IO {
 			catch( Exception ) {
 				sqlConnection = null;
 				Console.WriteLine("Unable to initialize RedditIO database.");
-				OnErrorInitialize?.Invoke();
+				EventErrorInitialize?.Invoke();
 			}
 		}
 		
@@ -48,19 +45,21 @@ namespace RedditImageScheduler.IO {
 			}
 			sqlConnection.Close();
 			sqlConnection.Dispose();
+
+			sFile = null;
 		}
 
 		// ===============================================
 		// EVENTS
 		public delegate void DatabaseEvent();
 
-		public event DatabaseEvent OnErrorInitialize;
-		public event DatabaseEvent OnErrorChange;
+		public event DatabaseEvent EventErrorInitialize;
+		public event DatabaseEvent EventErrorChange;
 
 		// ===============================================
 		// CALLBACKS
 		private void OnEntriesError() {
-			OnErrorChange?.Invoke();
+			EventErrorChange?.Invoke();
 		}
 	}
 }

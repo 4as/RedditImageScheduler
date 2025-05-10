@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using Eto.Forms;
 
-namespace RedditImageScheduler.UI.Entry {
+namespace RedditImageScheduler.UI.Editor {
 	public class ReddUIStatus : TextBox {
 		private readonly StringBuilder stringBuilder = new StringBuilder();
 		private readonly List<string> listStates = new List<string>();
-		private DateTime dateLast;
 		private DateTime dateCurrent;
 		private bool hasChanges;
 		private bool hasValidTitle;
@@ -29,15 +28,7 @@ namespace RedditImageScheduler.UI.Entry {
 			}
 		}
 
-		public DateTime LastDate {
-			get => dateLast;
-			set {
-				dateLast = value;
-				OnValidate();
-			}
-		}
-
-		public DateTime CurrentDate {
+		public DateTime Date {
 			get => dateCurrent;
 			set {
 				dateCurrent = value;
@@ -103,10 +94,10 @@ namespace RedditImageScheduler.UI.Entry {
 
 			if( valid ) {
 				if( !hasChanges ) {
-					Text = string.Format(ReddLanguage.STATUS_VALID_SAVED, CurrentDate);
+					Text = string.Format(ReddLanguage.STATUS_VALID_SAVED, Date);
 				}
 				else {
-					Text = string.Format(ReddLanguage.STATUS_VALID_UNSAVED, LastDate, CurrentDate);
+					Text = string.Format(ReddLanguage.STATUS_VALID_UNSAVED, Date);
 				}
 			}
 			else {
