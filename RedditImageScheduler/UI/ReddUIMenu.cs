@@ -45,11 +45,12 @@ namespace RedditImageScheduler.UI {
 		// EVENTS
 		public delegate void UIMenuEvent();
 		public event UIMenuEvent EventQuit;
+		public event UIMenuEvent EventOptions;
 
 		// ===============================================
 		// CALLBACKS
 		protected void OnOptions(object sender, EventArgs e) {
-			//TODO: open options dialog
+			EventOptions?.Invoke();
 		}
 		
 		protected void OnHomePage(object sender, EventArgs e) {

@@ -16,16 +16,18 @@ namespace RedditImageScheduler {
 		private readonly ReddUITimetable uiTimetable;
 		
 		private readonly ReddScheduler reddScheduler;
+		private readonly ReddDataOptions dataOptions;
 		
 		public ReddMain(ReddScheduler scheduler, ReddDataOptions options) {
 			reddScheduler = scheduler;
+			dataOptions = options;
 			
 			INSTANCE = this;
 			
 			uiEditor = new ReddUIEditor(reddScheduler, options);
 			uiTimetable = new ReddUITimetable(reddScheduler);
 			
-			Title = ReddLanguage.APP_NAME;
+			Title = ReddLanguage.NAME_APP;
 			MinimumSize = new Size(ReddConfig.WIDTH, ReddConfig.HEIGHT);
 			uiEditor.Size = MinimumSize;
 			uiTimetable.Size = MinimumSize;
@@ -49,8 +51,10 @@ namespace RedditImageScheduler {
 			uiEditor.EventTimetable += OnTimetable;
 			uiTimetable.EventEdit += OnEdit;
 			uiMenu.EventQuit += OnQuit;
-			
+			uiMenu.EventOptions += OnOptions;
 		}
+
+		
 
 		protected override void OnClosing(CancelEventArgs e) {
 			if( HasChanges && !ShowSaveWarning() ) return;
@@ -58,6 +62,7 @@ namespace RedditImageScheduler {
 			uiEditor.EventTimetable -= OnTimetable;
 			uiTimetable.EventEdit -= OnEdit;
 			uiMenu.EventQuit -= OnQuit;
+			uiMenu.EventOptions -= OnOptions;
 			base.OnClosing(e);
 		}
 
@@ -92,6 +97,25 @@ namespace RedditImageScheduler {
 		private void OnEdit() {
 			reddScheduler.Paused = true;
 			Content = uiEditor;
+		}
+		
+		private void OnOptions() {
+			ReddUIOptions options = new ReddUIOptions();
+			options.EntrySpacingHours = dataOptions.EntrySpacingHours;
+			options.PostSpacingMinutes = dataOptions.PostingSpacingMinutes;
+			options.OldTrimDays = dataOptions.TrimmingOldDays;
+			
+			DialogResult result = options.ShowModal();
+			switch( result ) {
+				case DialogResult.Yes:
+				case DialogResult.Ok:
+					dataOptions.EntrySpacingHours = options.EntrySpacingHours;
+					dataOptions.PostingSpacingMinutes = options.PostSpacingMinutes;
+					dataOptions.TrimmingOldDays = options.OldTrimDays;
+					break;
+				default:
+					return;
+			}
 		}
 
 		private void OnQuit() {

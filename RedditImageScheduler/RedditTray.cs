@@ -16,7 +16,7 @@ namespace RedditImageScheduler {
 			
 			formTray = new TrayIndicator() {
 				Image = SystemIcons.GetStaticIcon(StaticIconType.OpenDirectory, IconSize.Large),
-				Title = ReddLanguage.APP_NAME,
+				Title = ReddLanguage.NAME_APP,
 				Visible = true,
 				Menu = new ContextMenu()
 			};

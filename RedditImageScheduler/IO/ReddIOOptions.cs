@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Text;
 using IniParser;
 using IniParser.Model;
 using RedditImageScheduler.Data;
+using RedditImageScheduler.Utils.Data;
 
 namespace RedditImageScheduler.IO {
 	public class ReddIOOptions {
@@ -14,13 +16,17 @@ namespace RedditImageScheduler.IO {
 		private readonly IniDataParser iniParser = new IniDataParser();
 		private readonly ReddDataOptions dataOptions;
 		private readonly string sFilePath;
-		
-		private IniData iniData = new IniData();
 
+		private readonly StringBuilder sbIni = new StringBuilder();
+		private IniData iniData = new IniData();
+		
+		private readonly ReddClampedValue<uint> reddEntrySpacingHours =
+			new ReddClampedValue<uint>(ReddConfig.OPTION_ENTRY_SPACING_HOURS, ReddConfig.ENTRY_SPACING_HOURS); 
+		private readonly ReddClampedValue<uint> reddPostingSpacingMinutes =
+			new ReddClampedValue<uint>(ReddConfig.OPTION_POSTING_SPACING_MINUTES, ReddConfig.ENTRY_POSTING_COOLDOWN_MINUTES);
+		private readonly ReddClampedValue<uint> reddTrimmingOldDays =
+			new ReddClampedValue<uint>(ReddConfig.OPTION_OLD_TRIMMING_DAYS, ReddConfig.ENTRY_TRIMMING_DAYS_OLD);
 		private string sDatabasePath = ReddConfig.FILE_DATABASE;
-		private uint nEntrySpacingHours = ReddConfig.ENTRY_HOURS_SPACING;
-		private uint nPostingSpacingMinutes = ReddConfig.ENTRY_POSTING_COOLDOWN_MINUTES;
-		private uint nTrimmingOldDays = ReddConfig.ENTRY_TRIMMING_DAYS_OLD;
 
 		public ReddIOOptions(string filepath) {
 			sFilePath = filepath;
@@ -40,28 +46,28 @@ namespace RedditImageScheduler.IO {
 		}
 
 		public uint EntrySpacingHours {
-			get => nEntrySpacingHours;
+			get => reddEntrySpacingHours.Value;
 			set {
-				nEntrySpacingHours = value;
-				iniData[ReddConfig.SETTINGS_SECTION][PROP_SPACING_HOURS] = nEntrySpacingHours.ToString();
+				reddEntrySpacingHours.Value = value;
+				iniData[ReddConfig.SETTINGS_SECTION][PROP_SPACING_HOURS] = reddEntrySpacingHours.Value.ToString();
 				Save();
 			}
 		}
 		
 		public uint PostingSpacingMinutes {
-			get => nPostingSpacingMinutes;
+			get => reddPostingSpacingMinutes.Value;
 			set {
-				nPostingSpacingMinutes = value;
-				iniData[ReddConfig.SETTINGS_SECTION][PROP_POSTING_MINUTES] = nPostingSpacingMinutes.ToString();
+				reddPostingSpacingMinutes.Value = value;
+				iniData[ReddConfig.SETTINGS_SECTION][PROP_POSTING_MINUTES] = reddPostingSpacingMinutes.Value.ToString();
 				Save();
 			}
 		}
 		
 		public uint TrimmingOldDays {
-			get => nTrimmingOldDays;
+			get => reddTrimmingOldDays.Value;
 			set {
-				nTrimmingOldDays = value;
-				iniData[ReddConfig.SETTINGS_SECTION][PROP_TRIMMING_DAYS] = nTrimmingOldDays.ToString();
+				reddTrimmingOldDays.Value = value;
+				iniData[ReddConfig.SETTINGS_SECTION][PROP_TRIMMING_DAYS] = reddTrimmingOldDays.Value.ToString();
 				Save();
 			}
 		}
@@ -70,7 +76,12 @@ namespace RedditImageScheduler.IO {
 			try {
 				if( File.Exists(sFilePath) ) {
 					string ini = File.ReadAllText(sFilePath);
-					iniData = iniParser.Parse(ini);
+					try {
+						iniData = iniParser.Parse(ini);
+					}
+					catch(Exception) {
+						iniData = new IniData();
+					}
 				}
 				else {
 					File.Create(sFilePath);
@@ -84,15 +95,18 @@ namespace RedditImageScheduler.IO {
 				}
 
 				if( section.Contains(PROP_SPACING_HOURS) ) {
-					uint.TryParse(section[PROP_SPACING_HOURS], out nEntrySpacingHours);
+					uint.TryParse(section[PROP_SPACING_HOURS], out var entry_spacing);
+					reddEntrySpacingHours.Value = entry_spacing;
 				}
 				
 				if( section.Contains(PROP_POSTING_MINUTES) ) {
-					uint.TryParse(section[PROP_POSTING_MINUTES], out nPostingSpacingMinutes);
+					uint.TryParse(section[PROP_POSTING_MINUTES], out var posting_spacing);
+					reddPostingSpacingMinutes.Value = posting_spacing;
 				}
 				
 				if( section.Contains(PROP_TRIMMING_DAYS) ) {
-					uint.TryParse(section[PROP_TRIMMING_DAYS], out nTrimmingOldDays);
+					uint.TryParse(section[PROP_TRIMMING_DAYS], out var trimming_old);
+					reddTrimmingOldDays.Value = trimming_old;
 				}
 			}
 			catch( Exception ) {
@@ -102,7 +116,14 @@ namespace RedditImageScheduler.IO {
 
 		protected void Save() {
 			try {
-				File.WriteAllText(ReddConfig.FILE_SETTINGS, iniData.ToString());
+				sbIni.Clear();
+				foreach( var section in iniData.Sections ) {
+					sbIni.Append('[').Append(section.Name).Append(']').AppendLine();
+					foreach( var prop in section.Properties ) {
+						sbIni.Append(prop.Key).Append('=').Append(prop.Value).AppendLine();
+					}
+				}
+				File.WriteAllText(ReddConfig.FILE_SETTINGS, sbIni.ToString());
 			}
 			catch( Exception ) {
 				EventError?.Invoke();

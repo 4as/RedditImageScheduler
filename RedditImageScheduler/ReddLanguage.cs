@@ -1,10 +1,12 @@
 namespace RedditImageScheduler {
 	public static class ReddLanguage {
-		public static readonly string APP_NAME = "Reddit Image Scheduler";
+		public static readonly string NAME_APP = "Reddit Image Scheduler";
+		public static readonly string NAME_OPTIONS = "Options";
 		
 		public static readonly string BUTTON_ADD = "Add";
 		public static readonly string BUTTON_SAVE = "Save";
 		public static readonly string BUTTON_REMOVE = "Remove";
+		public static readonly string BUTTON_CANCEL = "Cancel";
 		public static readonly string BUTTON_TIMETABLE = "<- Timetable";
 		public static readonly string BUTTON_EDIT = "<- Edit";
 
@@ -19,6 +21,9 @@ namespace RedditImageScheduler {
 		public static readonly string LABEL_TITLE = "Title:";
 		public static readonly string LABEL_SOURCE = "Source:";
 		public static readonly string LABEL_NEXT = "Next:";
+		public static readonly string LABEL_ENTRY_SPACING = "Entry spacing:";
+		public static readonly string LABEL_POSTING_SPACING = "Posting overlap spacing:";
+		public static readonly string LABEL_TRIM_OLD = "History trim:";
 
 		public static readonly string MENU_EDIT = "&Edit...";
 		public static readonly string MENU_QUIT = "&Quit";
@@ -45,8 +50,16 @@ namespace RedditImageScheduler {
 		public static readonly string NEXT_HOURS = "\"{0}\" (Posting in: {1} hours)";
 		public static readonly string NEXT_MINUTES = "\"{0}\" (Posting in: {1} minutes)";
 		public static readonly string NEXT_SECONDS = "\"{0}\" (Posting in: {1} seconds)";
+
+		public static readonly string FORMAT_HOURS = "00 hours";
+		public static readonly string FORMAT_MINUTES = "00 minutes";
+		public static readonly string FORMAT_DAYS = "00 days";
 		
 		public static readonly string MESSAGE_UNSAVED_CHANGES = "You have unsaved changes. Save them now?";
+		
+		public static readonly string INFO_ENTRY_SPACING = "New entries in the timetable are created with the date of posting set to X hours after the latest entry.";
+		public static readonly string INFO_POSTING_SPACING = "If multiple posts are scheduled for the same time, they will be spaced out by X minutes.";
+		public static readonly string INFO_OLD_TRIMMING = "Old entries that were successfully posted are deleted from the timetable after X days.";
 		
 		public static readonly string ERROR = "Error";
 		public static readonly string ERROR_FILE_NOT_FOUND = "Unable to open file: {0}";
