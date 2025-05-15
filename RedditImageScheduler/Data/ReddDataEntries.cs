@@ -8,21 +8,24 @@ using RedditImageScheduler.Utils;
 namespace RedditImageScheduler.Data {
 	public class ReddDataEntries : IReadOnlyList<ReddDataEntry>, INotifyCollectionChanged {
 		private readonly ReddIOEntries ioEntries;
-		private readonly List<ReddDataEntry> listEntries;
+		private List<ReddDataEntry> listEntries;
 		public ReddDataEntries(ReddIOEntries entries) {
 			ioEntries = entries;
-			listEntries = entries.GetAll();
-
-			foreach( var entry in listEntries ) {
-				entry.Validate();
-				Update(entry);
-			}
 		}
 		
 		public int Count => listEntries.Count;
 		
 		public ReddDataEntry this[int index] => listEntries[index];
 		public ReddDataEntry this[uint index] => listEntries[(int)index];
+
+		public void Open() {
+			listEntries = ioEntries.GetAll();
+
+			foreach( var entry in listEntries ) {
+				entry.Validate();
+				Update(entry);
+			}
+		}
 
 		public ReddDataEntry Create(uint hours_spacing) {
 			ReddDataEntry entry = Add(string.Empty, string.Empty, FindNextTime(hours_spacing), null);

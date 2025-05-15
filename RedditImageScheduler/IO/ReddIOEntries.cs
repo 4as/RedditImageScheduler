@@ -6,14 +6,19 @@ using SQLite;
 
 namespace RedditImageScheduler.IO {
 	public class ReddIOEntries : INotifyCollectionChanged {
-		private readonly SQLiteConnection sqlConnection;
 		private readonly ReddDataEntries dataEntries;
-		public ReddIOEntries(SQLiteConnection connection) {
-			sqlConnection = connection;
+		
+		private SQLiteConnection sqlConnection;
+		public ReddIOEntries() {
 			dataEntries = new ReddDataEntries(this);
 		}
 		
 		public ReddDataEntries Data => dataEntries;
+
+		public void Open(SQLiteConnection connection) {
+			sqlConnection = connection;
+			dataEntries.Open();
+		}
 
 		public List<ReddDataEntry> GetAll() {
 			try {

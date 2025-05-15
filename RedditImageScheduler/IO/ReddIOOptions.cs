@@ -26,7 +26,7 @@ namespace RedditImageScheduler.IO {
 			new ReddClampedValue<uint>(ReddConfig.OPTION_POSTING_SPACING_MINUTES, ReddConfig.ENTRY_POSTING_COOLDOWN_MINUTES);
 		private readonly ReddClampedValue<uint> reddTrimmingOldDays =
 			new ReddClampedValue<uint>(ReddConfig.OPTION_OLD_TRIMMING_DAYS, ReddConfig.ENTRY_TRIMMING_DAYS_OLD);
-		private string sDatabasePath = ReddConfig.FILE_DATABASE;
+		private readonly ReddFilepath reddFilepath = new ReddFilepath(ReddConfig.FILE_DATABASE);
 
 		public ReddIOOptions(string filepath) {
 			sFilePath = filepath;
@@ -37,10 +37,10 @@ namespace RedditImageScheduler.IO {
 		public string FilePath => sFilePath;
 
 		public string DatabasePath {
-			get => sDatabasePath;
+			get => reddFilepath.Filepath;
 			set {
-				sDatabasePath = value;
-				iniData[ReddConfig.SETTINGS_SECTION][PROP_DATABASE] = sDatabasePath;
+				reddFilepath.Filepath = value;
+				iniData[ReddConfig.SETTINGS_SECTION][PROP_DATABASE] = reddFilepath.Filepath;
 				Save();
 			}
 		}
@@ -91,7 +91,7 @@ namespace RedditImageScheduler.IO {
 				PropertyCollection section = iniData[ReddConfig.SETTINGS_SECTION];
 
 				if( section.Contains(PROP_DATABASE) ) {
-					sDatabasePath = section[PROP_DATABASE];
+					reddFilepath.Filepath = section[PROP_DATABASE];
 				}
 
 				if( section.Contains(PROP_SPACING_HOURS) ) {

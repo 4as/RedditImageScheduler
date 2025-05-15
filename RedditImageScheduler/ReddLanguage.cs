@@ -26,6 +26,8 @@ namespace RedditImageScheduler {
 		public static readonly string LABEL_TRIM_OLD = "History trim:";
 
 		public static readonly string MENU_EDIT = "&Edit...";
+		public static readonly string MENU_LOAD = "&Load...";
+		public static readonly string MENU_SAVE = "&Move to...";
 		public static readonly string MENU_QUIT = "&Quit";
 		public static readonly string MENU_HOME = "&Homepage";
 		public static readonly string MENU_ABOUT = "&About";
@@ -50,10 +52,6 @@ namespace RedditImageScheduler {
 		public static readonly string NEXT_HOURS = "\"{0}\" (Posting in: {1} hours)";
 		public static readonly string NEXT_MINUTES = "\"{0}\" (Posting in: {1} minutes)";
 		public static readonly string NEXT_SECONDS = "\"{0}\" (Posting in: {1} seconds)";
-
-		public static readonly string FORMAT_HOURS = "00 hours";
-		public static readonly string FORMAT_MINUTES = "00 minutes";
-		public static readonly string FORMAT_DAYS = "00 days";
 		
 		public static readonly string MESSAGE_UNSAVED_CHANGES = "You have unsaved changes. Save them now?";
 		
@@ -65,6 +63,7 @@ namespace RedditImageScheduler {
 		public static readonly string ERROR_FILE_NOT_FOUND = "Unable to open file: {0}";
 		public static readonly string ERROR_SETTINGS_LOAD_FAILED = "Failed to access '{0}.' Make sure the current folder can be read from and written to. Your settings won't be saved.";
 		public static readonly string ERROR_DATABASE_INITIALIZATION_FAILED = "Failed to access '{0}.' Make sure the current folder can be read from and written to. Your schedule won't be saved.";
-		public static readonly string ERROR_DATABASE_MODIFY_FAILED = "Failed to modify the database. Is '{0}' still accessible?";
+		public static readonly string ERROR_DATABASE_MODIFY_FAILED = "Failed to modify the schedule file. Is '{0}' still accessible?";
+		public static readonly string ERROR_FILE_SAVE_FAILED = "Failed to move the schedule file. Is '{0}' accessible?";
 	}
 }

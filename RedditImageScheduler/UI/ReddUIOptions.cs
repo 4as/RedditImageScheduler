@@ -28,7 +28,6 @@ namespace RedditImageScheduler.UI {
 			etoSpacing.Increment = 1;
 			etoSpacing.DecimalPlaces = 0;
 			etoSpacing.MaximumDecimalPlaces = 0;
-			//etoSpacing.FormatString = ReddLanguage.FORMAT_HOURS;
 			etoSpacing.ToolTip = ReddLanguage.INFO_ENTRY_SPACING;
 			etoLayout.Add(etoSpacing);
 
@@ -44,7 +43,6 @@ namespace RedditImageScheduler.UI {
 			etoOverlap.Increment = 1;
 			etoOverlap.DecimalPlaces = 0;
 			etoOverlap.MaximumDecimalPlaces = 0;
-			//etoOverlap.FormatString = ReddLanguage.FORMAT_MINUTES;
 			etoOverlap.ToolTip = ReddLanguage.INFO_POSTING_SPACING;
 			etoLayout.Add(etoOverlap);
 
@@ -60,7 +58,6 @@ namespace RedditImageScheduler.UI {
 			etoTrim.Increment = 1;
 			etoTrim.DecimalPlaces = 0;
 			etoTrim.MaximumDecimalPlaces = 0;
-			//etoTrim.FormatString = ReddLanguage.FORMAT_DAYS;
 			etoTrim.ToolTip = ReddLanguage.INFO_OLD_TRIMMING;
 			etoLayout.Add(etoTrim);
 

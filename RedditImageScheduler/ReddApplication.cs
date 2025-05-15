@@ -83,7 +83,7 @@ namespace RedditImageScheduler {
 				if(!ioDatabase.IsOpen) return;
 			}
 
-			reddMain = new ReddMain(reddScheduler, ioOptions.Data);
+			reddMain = new ReddMain(ioDatabase, reddScheduler, ioOptions.Data);
 			reddMain.Show();
 			reddMain.Closed += OnClose;
 		}

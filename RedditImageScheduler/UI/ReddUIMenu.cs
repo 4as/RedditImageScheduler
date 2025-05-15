@@ -6,18 +6,24 @@ using RedditImageScheduler.UI.Core;
 namespace RedditImageScheduler.UI {
 	public class ReddUIMenu : MenuBar {
 		private readonly ReddUIMenuItem commandHome;
+		private readonly ReddUIMenuItem commandLoad;
+		private readonly ReddUIMenuItem commandSave;
 		private readonly ReddUIMenuItem commandAbout;
 		private readonly ReddUIMenuItem commandQuit;
 		private readonly ReddUIMenuItem commandOptions;
 		
 		public ReddUIMenu() {
 			commandHome = new ReddUIMenuItem() { Text = ReddLanguage.MENU_HOME };
+			commandLoad = new ReddUIMenuItem() { Text = ReddLanguage.MENU_LOAD };
+			commandSave = new ReddUIMenuItem() { Text = ReddLanguage.MENU_SAVE };
 			commandAbout = new ReddUIMenuItem() { Text = ReddLanguage.MENU_ABOUT };
 			commandQuit = new ReddUIMenuItem() { Text = ReddLanguage.MENU_QUIT };
 			commandOptions = new ReddUIMenuItem() { Text = ReddLanguage.MENU_OPTIONS };
 
 			IncludeSystemItems = MenuBarSystemItems.None;
 
+			ApplicationItems.Add(commandLoad);
+			ApplicationItems.Add(commandSave);
 			ApplicationItems.Add(commandOptions);
 			QuitItem = commandQuit;
 			HelpItems.Add(commandHome);
@@ -28,6 +34,8 @@ namespace RedditImageScheduler.UI {
 			base.OnLoad(e);
 			
 			commandHome.Click += OnHomePage;
+			commandLoad.Click += OnLoad;
+			commandSave.Click += OnSave;
 			commandQuit.Click += OnQuit;
 			commandAbout.Click += OnAbout;
 			commandOptions.Click += OnOptions;
@@ -35,6 +43,8 @@ namespace RedditImageScheduler.UI {
 
 		protected override void OnUnLoad(EventArgs e) {
 			commandHome.Click -= OnHomePage;
+			commandLoad.Click -= OnLoad;
+			commandSave.Click -= OnSave;
 			commandQuit.Click -= OnQuit;
 			commandAbout.Click -= OnAbout;
 			commandOptions.Click -= OnOptions;
@@ -45,10 +55,20 @@ namespace RedditImageScheduler.UI {
 		// EVENTS
 		public delegate void UIMenuEvent();
 		public event UIMenuEvent EventQuit;
+		public event UIMenuEvent EventLoad;
+		public event UIMenuEvent EventSave;
 		public event UIMenuEvent EventOptions;
 
 		// ===============================================
 		// CALLBACKS
+		private void OnLoad(object sender, EventArgs e) {
+			EventLoad?.Invoke();
+		}
+		
+		private void OnSave(object sender, EventArgs e) {
+			EventSave?.Invoke();
+		}
+		
 		protected void OnOptions(object sender, EventArgs e) {
 			EventOptions?.Invoke();
 		}

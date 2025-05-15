@@ -5,31 +5,33 @@ using SQLite;
 
 namespace RedditImageScheduler.IO {
 	public class ReddIODatabase {
+		private readonly ReddIOEntries ioEntries = new ReddIOEntries();
+
 		private SQLiteConnection sqlConnection;
-		private ReddIOEntries ioEntries;
 		private string sFile;
 
 		// ================================================================================
 		// GETTERS / SETTERS
 		public string FilePath => sFile;
 		public bool IsOpen => sqlConnection != null;
-		
+
 		public ReddDataEntries Entries => ioEntries.Data;
 
 		// ================================================================================
 		// PUBLIC
 		public void Open(string filepath) {
+			Close();
 			try {
 				SQLiteConnectionString options = new SQLiteConnectionString(filepath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite, true);
 				sqlConnection = new SQLiteConnection(options);
-				
+
 				//sqlConnection.DropTable<ReddDataEntry>();
-				
+
 				sqlConnection.CreateTable<ReddDataEntry>();
 
 				sFile = filepath;
-				
-				ioEntries = new ReddIOEntries(sqlConnection);
+
+				ioEntries.Open(sqlConnection);
 				ioEntries.OnError += OnEntriesError;
 			}
 			catch( Exception ) {
@@ -38,13 +40,14 @@ namespace RedditImageScheduler.IO {
 				EventErrorInitialize?.Invoke();
 			}
 		}
-		
+
 		public void Close() {
-			if( ioEntries != null ) {
-				ioEntries.OnError -= OnEntriesError;
+			ioEntries.OnError -= OnEntriesError;
+			if( sqlConnection != null ) {
+				sqlConnection.Close();
+				sqlConnection.Dispose();
+				sqlConnection = null;
 			}
-			sqlConnection.Close();
-			sqlConnection.Dispose();
 
 			sFile = null;
 		}

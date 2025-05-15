@@ -1,8 +1,11 @@
 using System;
 using System.ComponentModel;
+using System.IO;
+using Eto;
 using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Data;
+using RedditImageScheduler.IO;
 using RedditImageScheduler.Scheduler;
 using RedditImageScheduler.UI;
 
@@ -11,14 +14,18 @@ namespace RedditImageScheduler {
 		private static ReddMain INSTANCE;
 		public static ReddMain Instance => INSTANCE;
 		
+		private readonly OpenFileDialog dialogOpenFile = new OpenFileDialog();
+		private readonly SaveFileDialog dialogSaveFile = new SaveFileDialog();
 		private readonly ReddUIMenu uiMenu = new ReddUIMenu();
 		private readonly ReddUIEditor uiEditor;
 		private readonly ReddUITimetable uiTimetable;
-		
+
+		private readonly ReddIODatabase ioDatabase;
 		private readonly ReddScheduler reddScheduler;
 		private readonly ReddDataOptions dataOptions;
 		
-		public ReddMain(ReddScheduler scheduler, ReddDataOptions options) {
+		public ReddMain(ReddIODatabase database, ReddScheduler scheduler, ReddDataOptions options) {
+			ioDatabase = database;
 			reddScheduler = scheduler;
 			dataOptions = options;
 			
@@ -26,6 +33,13 @@ namespace RedditImageScheduler {
 			
 			uiEditor = new ReddUIEditor(reddScheduler, options);
 			uiTimetable = new ReddUITimetable(reddScheduler);
+
+			dialogOpenFile.MultiSelect = false;
+			dialogOpenFile.Filters.Add(ReddConfig.DB_FILTER);
+
+			dialogSaveFile.FileName = ReddConfig.FILE_DATABASE;
+			dialogSaveFile.Directory = new Uri(EtoEnvironment.GetFolderPath(EtoSpecialFolder.EntryExecutable));
+			dialogSaveFile.Filters.Add(ReddConfig.DB_FILTER);
 			
 			Title = ReddLanguage.NAME_APP;
 			MinimumSize = new Size(ReddConfig.WIDTH, ReddConfig.HEIGHT);
@@ -52,6 +66,8 @@ namespace RedditImageScheduler {
 			uiTimetable.EventEdit += OnEdit;
 			uiMenu.EventQuit += OnQuit;
 			uiMenu.EventOptions += OnOptions;
+			uiMenu.EventSave += OnSave;
+			uiMenu.EventLoad += OnLoad;
 		}
 
 		
@@ -61,6 +77,8 @@ namespace RedditImageScheduler {
 			
 			uiEditor.EventTimetable -= OnTimetable;
 			uiTimetable.EventEdit -= OnEdit;
+			uiMenu.EventSave -= OnSave;
+			uiMenu.EventLoad -= OnLoad;
 			uiMenu.EventQuit -= OnQuit;
 			uiMenu.EventOptions -= OnOptions;
 			base.OnClosing(e);
@@ -89,6 +107,32 @@ namespace RedditImageScheduler {
 
 		// ===============================================
 		// CALLBACKS
+		private void OnLoad() {
+			DialogResult result = dialogOpenFile.ShowDialog(ParentWindow);
+			if( dialogOpenFile.FileName != null && (result == DialogResult.Yes || result == DialogResult.Ok) ) {
+				ioDatabase.Open(dialogOpenFile.FileName);
+				if( ioDatabase.IsOpen ) {
+					dataOptions.DatabasePath = ioDatabase.FilePath;
+				}
+			}
+		}
+
+		private void OnSave() {
+			DialogResult result = dialogSaveFile.ShowDialog(ParentWindow);
+			if( dialogSaveFile.FileName != null && (result == DialogResult.Yes || result == DialogResult.Ok) ) {
+				ioDatabase.Close();
+				try {
+					File.Move(dataOptions.DatabasePath, dialogSaveFile.FileName);
+					dataOptions.DatabasePath = dialogSaveFile.FileName;
+				}
+				catch( Exception ) {
+					MessageBox.Show(string.Format(ReddLanguage.ERROR_FILE_SAVE_FAILED, dialogSaveFile.FileName), MessageBoxType.Error);
+				}
+
+				ioDatabase.Open(dataOptions.DatabasePath);
+			}
+		}
+		
 		private void OnTimetable() {
 			reddScheduler.Paused = false;
 			Content = uiTimetable;
