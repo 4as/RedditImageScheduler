@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
+using RedditImageScheduler.Data;
 using RedditImageScheduler.Utils;
 
 namespace RedditImageScheduler.UI.Editor {
@@ -10,9 +11,12 @@ namespace RedditImageScheduler.UI.Editor {
 		private readonly DateTimePicker etoPicker = new DateTimePicker();
 		private readonly Label etoLabelHours = new Label();
 		private readonly NumericStepper etoHours = new NumericStepper();
+		private readonly Button etoSuggest = new Button();
 		private readonly Color colorDefault;
-		public ReddUIDate() {
+		private readonly ReddDataOptions dataOptions;
+		public ReddUIDate(ReddDataOptions options) {
 			colorDefault = BackgroundColor;
+			dataOptions = options;
 			
 			PropertyInfo prop = etoPicker.ControlObject.GetType().GetProperty("ShowCheckBox");
 			if( prop != null && prop.CanWrite ) {
@@ -39,6 +43,9 @@ namespace RedditImageScheduler.UI.Editor {
 			etoHours.MinValue = 0;
 			etoHours.MaxValue = 23;
 			Add(etoHours);
+
+			etoSuggest.Text = ReddLanguage.BUTTON_SUGGEST;
+			Add(etoSuggest);
 			
 			EndHorizontal();
 		}
@@ -47,12 +54,14 @@ namespace RedditImageScheduler.UI.Editor {
 			base.OnLoad(e);
 			etoHours.ValueChanged += OnModify;
 			etoPicker.ValueChanged += OnModify;
+			etoSuggest.Click += OnSuggest;
 			OnValidate();
 		}
 
 		protected override void OnUnLoad(EventArgs e) {
 			etoHours.ValueChanged -= OnModify;
 			etoPicker.ValueChanged -= OnModify;
+			etoSuggest.Click -= OnSuggest;
 			base.OnUnLoad(e);
 		}
 
@@ -82,11 +91,22 @@ namespace RedditImageScheduler.UI.Editor {
 		// ===============================================
 		// EVENTS
 		public delegate void UIDateEvent();
-		public event UIDateEvent OnDateChanged;
+		public event UIDateEvent EventChanged;
 		
 		private void OnModify(object sender, EventArgs e) {
 			OnValidate();
-			OnDateChanged?.Invoke();
+			EventChanged?.Invoke();
+		}
+		
+		private void OnSuggest(object sender, EventArgs e) {
+#if DEBUG
+			DateTime date = DateTime.Now;
+			Date = date.AddSeconds(10);
+#else
+			DateTime date = DateTime.Now;
+			date = new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0);
+			Date = date.AddHours(dataOptions.EntrySpacingHours);
+#endif
 		}
 
 		private void OnValidate() {

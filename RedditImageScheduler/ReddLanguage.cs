@@ -7,6 +7,7 @@ namespace RedditImageScheduler {
 		public static readonly string BUTTON_SAVE = "Save";
 		public static readonly string BUTTON_REMOVE = "Remove";
 		public static readonly string BUTTON_CANCEL = "Cancel";
+		public static readonly string BUTTON_SUGGEST = "Suggest";
 		public static readonly string BUTTON_TIMETABLE = "<- Timetable";
 		public static readonly string BUTTON_EDIT = "<- Edit";
 

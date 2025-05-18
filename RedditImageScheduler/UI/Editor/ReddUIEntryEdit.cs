@@ -12,16 +12,18 @@ namespace RedditImageScheduler.UI.Editor {
 		private readonly Button etoDelete = new Button();
 		private readonly ReddUITitle uiTitle = new ReddUITitle();
 		private readonly ReddUISource uiSource = new ReddUISource();
-		private readonly ReddUIDate uiDate = new ReddUIDate();
 		private readonly ReddUIImage uiImage = new ReddUIImage();
 		private readonly ReddUIStatus uiStatus = new ReddUIStatus();
+		
+		private readonly ReddUIDate uiDate;
 
 		private readonly ReddUtilDropHandler utilDrop = new ReddUtilDropHandler();
 		private ReddDataEntry dataEntry;
 
-		public ReddUIEntryEdit() {
+		public ReddUIEntryEdit(ReddDataOptions options) {
 			Spacing = new Size(2, 2);
-			Padding = new Padding(2);
+
+			uiDate = new ReddUIDate(options);
 			
 			BeginVertical();
 			
@@ -80,11 +82,7 @@ namespace RedditImageScheduler.UI.Editor {
 			
 			uiTitle.Text = entry.Title;
 			uiSource.Text = entry.Source;
-#if DEBUG
-			uiDate.Date = DateTime.Now.AddSeconds(10);
-#else
 			uiDate.Date = entry.Date;
-#endif
 			uiImage.Set(dataEntry.Bitmap);
 			
 			uiStatus.Date = entry.Date;
@@ -94,7 +92,7 @@ namespace RedditImageScheduler.UI.Editor {
 			etoDelete.Click += OnButtonDelete;
 			
 			uiTitle.OnTitleChanged += OnModify;
-			uiDate.OnDateChanged += OnModify;
+			uiDate.EventChanged += OnModify;
 			uiImage.OnImageChanged += OnModify;
 			uiSource.OnSourceChanged += OnModify;
 			OnModify();
@@ -110,7 +108,7 @@ namespace RedditImageScheduler.UI.Editor {
 			uiStatus.HasChanges = false;
 			
 			uiTitle.OnTitleChanged -= OnModify;
-			uiDate.OnDateChanged -= OnModify;
+			uiDate.EventChanged -= OnModify;
 			uiImage.OnImageChanged -= OnModify;
 			uiSource.OnSourceChanged -= OnModify;
 			

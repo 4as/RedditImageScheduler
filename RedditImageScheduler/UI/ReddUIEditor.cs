@@ -8,10 +8,11 @@ using RedditImageScheduler.UI.Editor;
 
 namespace RedditImageScheduler.UI {
 	public class ReddUIEditor : DynamicLayout {
-		private readonly ReddUIEntryEdit uiEntry = new ReddUIEntryEdit();
 		private readonly Button etoTimetable = new Button();
 		private readonly Button etoAdd = new Button();
 		private readonly ListBox etoList = new ListBox();
+		
+		private readonly ReddUIEntryEdit uiEntry;
 
 		private readonly List<ReddDataEntry> listItems = new List<ReddDataEntry>();
 		private readonly ReddScheduler reddScheduler;
@@ -22,6 +23,8 @@ namespace RedditImageScheduler.UI {
 			reddScheduler = scheduler;
 			dataOptions = options;
 			dataEntries = reddScheduler.Entries;
+
+			uiEntry = new ReddUIEntryEdit(options);
 			
 			etoList.Size = new Size(ReddConfig.WIDTH/2, ReddConfig.HEIGHT);
 			etoList.DataStore = listItems;
