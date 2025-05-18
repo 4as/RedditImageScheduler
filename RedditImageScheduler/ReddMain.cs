@@ -6,7 +6,6 @@ using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Data;
 using RedditImageScheduler.IO;
-using RedditImageScheduler.Scheduler;
 using RedditImageScheduler.UI;
 
 namespace RedditImageScheduler {
@@ -70,8 +69,6 @@ namespace RedditImageScheduler {
 			uiMenu.EventLoad += OnLoad;
 		}
 
-		
-
 		protected override void OnClosing(CancelEventArgs e) {
 			if( HasChanges && !ShowSaveWarning() ) return;
 			
@@ -112,7 +109,7 @@ namespace RedditImageScheduler {
 			if( dialogOpenFile.FileName != null && (result == DialogResult.Yes || result == DialogResult.Ok) ) {
 				ioDatabase.Open(dialogOpenFile.FileName);
 				if( ioDatabase.IsOpen ) {
-					dataOptions.DatabasePath = ioDatabase.FilePath;
+					dataOptions.SetDatabase(ioDatabase.FilePath);
 				}
 			}
 		}
@@ -123,7 +120,7 @@ namespace RedditImageScheduler {
 				ioDatabase.Close();
 				try {
 					File.Move(dataOptions.DatabasePath, dialogSaveFile.FileName);
-					dataOptions.DatabasePath = dialogSaveFile.FileName;
+					dataOptions.SetDatabase(dialogSaveFile.FileName);
 				}
 				catch( Exception ) {
 					MessageBox.Show(string.Format(ReddLanguage.ERROR_FILE_SAVE_FAILED, dialogSaveFile.FileName), MessageBoxType.Error);
@@ -153,9 +150,7 @@ namespace RedditImageScheduler {
 			switch( result ) {
 				case DialogResult.Yes:
 				case DialogResult.Ok:
-					dataOptions.EntrySpacingHours = options.EntrySpacingHours;
-					dataOptions.PostingSpacingMinutes = options.PostSpacingMinutes;
-					dataOptions.TrimmingOldDays = options.OldTrimDays;
+					dataOptions.SetOptions(options.EntrySpacingHours, options.PostSpacingMinutes, options.OldTrimDays);
 					break;
 				default:
 					return;

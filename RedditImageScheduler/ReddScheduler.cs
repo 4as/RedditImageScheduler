@@ -5,7 +5,7 @@ using System.Timers;
 using RedditImageScheduler.Data;
 using Timer = System.Timers.Timer;
 
-namespace RedditImageScheduler.Scheduler {
+namespace RedditImageScheduler {
 	public class ReddScheduler {
 		private readonly Timer sysTimer = new Timer(1000);
 		private readonly StringBuilder sbState = new StringBuilder();
@@ -22,6 +22,8 @@ namespace RedditImageScheduler.Scheduler {
 		}
 
 		public void Initialize(ReddDataEntries entries) {
+			Deinitialize();
+			
 			if( sysContext == null ) sysContext = SynchronizationContext.Current;
 			dataEntries = entries;
 			dataEntries.OnUpdate += OnChange;
@@ -29,8 +31,11 @@ namespace RedditImageScheduler.Scheduler {
 		}
 
 		public void Deinitialize() {
-			dataEntries.OnUpdate -= OnChange;
-			dataEntries = null;
+			if( dataEntries != null ) {
+				dataEntries.OnUpdate -= OnChange;
+				dataEntries = null;
+			}
+
 			StopTimer();
 		}
 
@@ -87,10 +92,10 @@ namespace RedditImageScheduler.Scheduler {
 		private void StopTimer() {
 			if( !sysTimer.Enabled ) return;
 
-			sysTimer.Enabled = true;
-			sysTimer.AutoReset = true;
-			sysTimer.Elapsed += OnTimer;
-			sysTimer.Start();
+			sysTimer.Enabled = false;
+			sysTimer.AutoReset = false;
+			sysTimer.Elapsed -= OnTimer;
+			sysTimer.Stop();
 		}
 
 		// ===============================================

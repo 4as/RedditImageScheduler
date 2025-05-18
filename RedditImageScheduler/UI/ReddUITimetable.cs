@@ -2,7 +2,6 @@ using System;
 using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Data;
-using RedditImageScheduler.Scheduler;
 using RedditImageScheduler.UI.Timetable;
 
 namespace RedditImageScheduler.UI {

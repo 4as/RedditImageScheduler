@@ -7,7 +7,8 @@ namespace RedditImageScheduler {
 		public static readonly string FILE_DATABASE = "database.ristt";
 		public static readonly string FILE_SETTINGS = "settings.ini";
 		public static readonly string SETTINGS_SECTION = "Options";
-		public static readonly string HOMEPAGE = "https://github.com/4as/RedditImageScheduler";
+		public static readonly string URL_HOMEPAGE = "https://github.com/4as/RedditImageScheduler";
+		public static readonly string URL_REGISTER = "https://www.reddit.com/prefs/apps";
 		public static readonly FileFilter IMAGE_FILTER = new FileFilter("Images", ".png", ".jpg", ".jpeg", ".gif", ".bmp");
 		public static readonly FileFilter DB_FILTER = new FileFilter("Schedule", ".ristt");
 		

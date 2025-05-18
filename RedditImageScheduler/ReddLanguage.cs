@@ -2,6 +2,7 @@ namespace RedditImageScheduler {
 	public static class ReddLanguage {
 		public static readonly string NAME_APP = "Reddit Image Scheduler";
 		public static readonly string NAME_OPTIONS = "Options";
+		public static readonly string NAME_LOGIN = "Login";
 		
 		public static readonly string BUTTON_ADD = "Add";
 		public static readonly string BUTTON_SAVE = "Save";
@@ -10,12 +11,15 @@ namespace RedditImageScheduler {
 		public static readonly string BUTTON_SUGGEST = "Suggest";
 		public static readonly string BUTTON_TIMETABLE = "<- Timetable";
 		public static readonly string BUTTON_EDIT = "<- Edit";
+		public static readonly string BUTTON_LOGIN = "Connect";
+		public static readonly string BUTTON_REGISTER = "Register";
 
 		public static readonly string TEXT_NO_TITLE = "[EMPTY]";
 		public static readonly string TEXT_NONE = "None";
 		public static readonly string TEXT_PLACEHOLDER_TITLE = "Title";
 		public static readonly string TEXT_PLACEHOLDER_SOURCE = "Source URL";
 		public static readonly string TEXT_CONFIRM_DELETE = "Click again to confirm";
+		public static readonly string TEXT_CONNECTING = "Connecting...";
 		
 		public static readonly string LABEL_DATE = "Post on:";
 		public static readonly string LABEL_HOUR = "Hour:";
@@ -25,14 +29,17 @@ namespace RedditImageScheduler {
 		public static readonly string LABEL_ENTRY_SPACING = "Entry spacing:";
 		public static readonly string LABEL_POSTING_SPACING = "Posting overlap spacing:";
 		public static readonly string LABEL_TRIM_OLD = "History trim:";
+		public static readonly string LABEL_APP_ID = "App ID:";
+		public static readonly string LABEL_APP_SECRET = "App secret:";
 
-		public static readonly string MENU_EDIT = "&Edit...";
-		public static readonly string MENU_LOAD = "&Load...";
+		public static readonly string MENU_LOGOUT = "&Log out";
+		public static readonly string MENU_LOAD = "&Open...";
 		public static readonly string MENU_SAVE = "&Move to...";
 		public static readonly string MENU_QUIT = "&Quit";
 		public static readonly string MENU_HOME = "&Homepage";
 		public static readonly string MENU_ABOUT = "&About";
-		public static readonly string MENU_OPTIONS = "&Options...";
+		public static readonly string MENU_OPTIONS = "&Preferences";
+		public static readonly string MENU_EDIT = "&Edit";
 		
 		public static readonly string STATUS_VALID_SAVED = "Entry is valid. Current schedule: {0}.";
 		public static readonly string STATUS_VALID_UNSAVED = "Entry is valid (modified). Target schedule: {0}.";

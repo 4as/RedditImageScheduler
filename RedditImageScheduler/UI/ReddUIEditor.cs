@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Eto.Drawing;
 using Eto.Forms;
 using RedditImageScheduler.Data;
-using RedditImageScheduler.Scheduler;
 using RedditImageScheduler.UI.Editor;
 
 namespace RedditImageScheduler.UI {

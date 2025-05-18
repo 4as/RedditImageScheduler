@@ -9,9 +9,12 @@ using RedditImageScheduler.Utils.Data;
 namespace RedditImageScheduler.IO {
 	public class ReddIOOptions {
 		private static readonly string PROP_DATABASE = nameof(DatabasePath);
+		private static readonly string PROP_APP_ID = nameof(AppId);
+		private static readonly string PROP_APP_SECRET = nameof(AppSecret);
 		private static readonly string PROP_SPACING_HOURS = nameof(EntrySpacingHours);
 		private static readonly string PROP_POSTING_MINUTES = nameof(PostingSpacingMinutes);
 		private static readonly string PROP_TRIMMING_DAYS = nameof(TrimmingOldDays);
+		
 		
 		private readonly IniDataParser iniParser = new IniDataParser();
 		private readonly ReddDataOptions dataOptions;
@@ -28,6 +31,9 @@ namespace RedditImageScheduler.IO {
 			new ReddClampedValue<uint>(ReddConfig.OPTION_OLD_TRIMMING_DAYS, ReddConfig.ENTRY_TRIMMING_DAYS_OLD);
 		private readonly ReddFilepath reddFilepath = new ReddFilepath(ReddConfig.FILE_DATABASE);
 
+		private string sAppId;
+		private string sAppSecret;
+
 		public ReddIOOptions(string filepath) {
 			sFilePath = filepath;
 			dataOptions = new ReddDataOptions(this);
@@ -35,41 +41,36 @@ namespace RedditImageScheduler.IO {
 		
 		public ReddDataOptions Data => dataOptions;
 		public string FilePath => sFilePath;
-
-		public string DatabasePath {
-			get => reddFilepath.Filepath;
-			set {
-				reddFilepath.Filepath = value;
-				iniData[ReddConfig.SETTINGS_SECTION][PROP_DATABASE] = reddFilepath.Filepath;
-				Save();
-			}
-		}
-
-		public uint EntrySpacingHours {
-			get => reddEntrySpacingHours.Value;
-			set {
-				reddEntrySpacingHours.Value = value;
-				iniData[ReddConfig.SETTINGS_SECTION][PROP_SPACING_HOURS] = reddEntrySpacingHours.Value.ToString();
-				Save();
-			}
-		}
 		
-		public uint PostingSpacingMinutes {
-			get => reddPostingSpacingMinutes.Value;
-			set {
-				reddPostingSpacingMinutes.Value = value;
-				iniData[ReddConfig.SETTINGS_SECTION][PROP_POSTING_MINUTES] = reddPostingSpacingMinutes.Value.ToString();
-				Save();
-			}
+		public string AppId => sAppId;
+		public string AppSecret => sAppSecret;
+		public string DatabasePath => reddFilepath.Filepath;
+		public uint EntrySpacingHours => reddEntrySpacingHours.Value;
+		public uint PostingSpacingMinutes => reddPostingSpacingMinutes.Value;
+		public uint TrimmingOldDays => reddTrimmingOldDays.Value;
+
+		public void SetApp(string app_id, string app_secret) {
+			sAppId = app_id;
+			iniData[ReddConfig.SETTINGS_SECTION][PROP_APP_ID] = sAppId;
+			sAppSecret = app_secret;
+			iniData[ReddConfig.SETTINGS_SECTION][PROP_APP_SECRET] = sAppSecret;
+			Save();
 		}
-		
-		public uint TrimmingOldDays {
-			get => reddTrimmingOldDays.Value;
-			set {
-				reddTrimmingOldDays.Value = value;
-				iniData[ReddConfig.SETTINGS_SECTION][PROP_TRIMMING_DAYS] = reddTrimmingOldDays.Value.ToString();
-				Save();
-			}
+
+		public void SetDatabase(string database_path) {
+			reddFilepath.Filepath = database_path;
+			iniData[ReddConfig.SETTINGS_SECTION][PROP_DATABASE] = reddFilepath.Filepath;
+			Save();
+		}
+
+		public void SetOptions(uint entry_spacing, uint posting_spacing, uint trimming_old_days) {
+			reddEntrySpacingHours.Value = entry_spacing;
+			iniData[ReddConfig.SETTINGS_SECTION][PROP_SPACING_HOURS] = reddEntrySpacingHours.Value.ToString();
+			reddPostingSpacingMinutes.Value = posting_spacing;
+			iniData[ReddConfig.SETTINGS_SECTION][PROP_POSTING_MINUTES] = reddPostingSpacingMinutes.Value.ToString();
+			reddTrimmingOldDays.Value = trimming_old_days;
+			iniData[ReddConfig.SETTINGS_SECTION][PROP_TRIMMING_DAYS] = reddTrimmingOldDays.Value.ToString();
+			Save();
 		}
 		
 		public void Load() {
@@ -89,6 +90,14 @@ namespace RedditImageScheduler.IO {
 				
 				iniData.Sections.Add(ReddConfig.SETTINGS_SECTION);
 				PropertyCollection section = iniData[ReddConfig.SETTINGS_SECTION];
+				
+				if( section.Contains(PROP_APP_ID)) {
+					sAppId = section[PROP_APP_ID];
+				}
+
+				if( section.Contains(PROP_APP_SECRET) ) {
+					sAppSecret = section[PROP_APP_SECRET];
+				}
 
 				if( section.Contains(PROP_DATABASE) ) {
 					reddFilepath.Filepath = section[PROP_DATABASE];

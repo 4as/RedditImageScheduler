@@ -5,19 +5,18 @@ using RedditImageScheduler.UI.Core;
 using RedditImageScheduler.Utils;
 
 namespace RedditImageScheduler {
-	public class RedditTray {
+	public class ReddTray {
 		private readonly TrayIndicator formTray;
 		private readonly ButtonMenuItem menuDebug = new ButtonMenuItem();
 		private readonly ReddUIMenuItem commandOpen;
 		private readonly ReddUIMenuItem commandQuit;
-		public RedditTray() {
+		public ReddTray() {
 			commandOpen = new ReddUIMenuItem() { Text = ReddLanguage.MENU_EDIT };
 			commandQuit = new ReddUIMenuItem() { Text = ReddLanguage.MENU_QUIT };
 			
 			formTray = new TrayIndicator() {
 				Image = SystemIcons.GetStaticIcon(StaticIconType.OpenDirectory, IconSize.Large),
 				Title = ReddLanguage.NAME_APP,
-				Visible = true,
 				Menu = new ContextMenu()
 			};
 			
@@ -34,6 +33,7 @@ namespace RedditImageScheduler {
 
 		public void Initialize() {
 			Deinitialize();
+			formTray.Visible = true;
 			commandOpen.Click += OnActivation;
 			formTray.Activated += OnActivation;
 			formTray.Menu.Opening += OnMenu;
@@ -41,6 +41,7 @@ namespace RedditImageScheduler {
 		}
 
 		public void Deinitialize() {
+			formTray.Visible = false;
 			commandOpen.Click -= OnActivation;
 			formTray.Activated -= OnActivation;
 			formTray.Menu.Opening -= OnMenu;

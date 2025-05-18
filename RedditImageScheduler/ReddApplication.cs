@@ -2,24 +2,27 @@ using System;
 using System.ComponentModel;
 using Eto.Forms;
 using RedditImageScheduler.IO;
-using RedditImageScheduler.Scheduler;
 
 namespace RedditImageScheduler {
 	public class ReddApplication : Application {
+		private readonly ReddIOWeb ioWeb;
 		private readonly ReddIOOptions ioOptions;
 		private readonly ReddIODatabase ioDatabase;
+		private readonly ReddLogin reddLogin;
 		private readonly ReddScheduler reddScheduler;
-		private readonly RedditTray reddTray;
-			
+		private readonly ReddTray reddTray;
+		
 		private ReddMain reddMain;
 		private bool isRunning;
 
 		public ReddApplication(string platform)
 			: base(platform) {
+			ioWeb = new ReddIOWeb();
 			ioOptions = new ReddIOOptions(ReddConfig.FILE_SETTINGS);
 			ioDatabase = new ReddIODatabase();
+			reddLogin = new ReddLogin(ioWeb);
 			reddScheduler = new ReddScheduler(ioOptions.Data);
-			reddTray = new RedditTray();
+			reddTray = new ReddTray();
 		}
 
 		~ReddApplication() {
@@ -28,24 +31,14 @@ namespace RedditImageScheduler {
 
 		protected override void OnInitialized(EventArgs e) {
 			base.OnInitialized(e);
-
+			
 			ioOptions.EventError += OnOptionsError;
 			ioOptions.Load();
-			
-			ioDatabase.EventErrorInitialize += OnDatabaseErrorInitialize;
-			ioDatabase.EventErrorChange += OnDatabaseErrorChange;
-			ioDatabase.Open(ioOptions.DatabasePath);
-			
-			reddTray.EventOpen += OnOpen;
-			reddTray.EventQuit += OnQuit;
-			reddTray.Initialize();
 
-			reddScheduler.Initialize(ioDatabase.Entries);
+			reddLogin.EventLogin += OnLogin;
+			reddLogin.Initialize(ioOptions.Data);
 			
 			isRunning = true;
-#if DEBUG
-			OnOpen();
-#endif
 		}
 
 		protected override void OnTerminating(CancelEventArgs e) {
@@ -73,6 +66,21 @@ namespace RedditImageScheduler {
 			Quit();
 		}
 
+		private void OnLogin() {
+			reddLogin.EventLogin -= OnLogin;
+			reddLogin.Deinitialize();
+			
+			ioDatabase.EventErrorInitialize += OnDatabaseErrorInitialize;
+			ioDatabase.EventErrorChange += OnDatabaseErrorChange;
+			ioDatabase.Open(ioOptions.DatabasePath);
+			
+			reddTray.EventOpen += OnOpen;
+			reddTray.EventQuit += OnQuit;
+			reddTray.Initialize();
+
+			reddScheduler.Initialize(ioDatabase.Entries);
+		}
+
 		private void OnOpen() {
 			if( reddMain != null ) {
 				return;
@@ -91,6 +99,7 @@ namespace RedditImageScheduler {
 		private void OnClose(object sender, EventArgs e) {
 			reddMain.Closed -= OnClose;
 			if( !reddMain.IsDisposed ) reddMain.Dispose();
+			
 			reddMain = null;
 		}
 
