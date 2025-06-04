@@ -1,9 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Timers;
+using Reddit;
+using Reddit.Controllers;
+using Reddit.Things;
 using RedditImageScheduler.Data;
+using RedditImageScheduler.IO;
+using Subreddit = Reddit.Controllers.Subreddit;
 using Timer = System.Timers.Timer;
+using User = Reddit.Controllers.User;
 
 namespace RedditImageScheduler {
 	public class ReddScheduler {
@@ -12,6 +19,8 @@ namespace RedditImageScheduler {
 		private readonly ReddDataOptions dataOptions;
 		
 		private SynchronizationContext sysContext = SynchronizationContext.Current;
+		private RedditClient redditClient;
+		private User redditUser;
 		private ReddDataEntries dataEntries;
 		private ReddDataEntry dataNext;
 		private long nLastPosting;
@@ -25,8 +34,24 @@ namespace RedditImageScheduler {
 			Deinitialize();
 			
 			if( sysContext == null ) sysContext = SynchronizationContext.Current;
+			
+			try {
+				redditClient = new RedditClient(dataOptions.AppId, dataOptions.RefreshToken, null, dataOptions.AccessToken);
+				redditUser = redditClient.Account.Me;
+			}
+			catch( Exception ) {
+				EventError?.Invoke();
+				return;
+			}
+
+			if( string.IsNullOrEmpty(redditUser.Name) ) {
+				EventError?.Invoke();
+				return;
+			}
+			
 			dataEntries = entries;
 			dataEntries.OnUpdate += OnChange;
+
 			OnChange();
 		}
 
@@ -35,6 +60,8 @@ namespace RedditImageScheduler {
 				dataEntries.OnUpdate -= OnChange;
 				dataEntries = null;
 			}
+
+			redditClient = null;
 
 			StopTimer();
 		}
@@ -101,7 +128,8 @@ namespace RedditImageScheduler {
 		// ===============================================
 		// EVENTS
 		public delegate void UISchedulerEvent();
-		public event UISchedulerEvent OnUpdate;
+		public event UISchedulerEvent EventUpdate;
+		public event UISchedulerEvent EventError;
 
 		// ===============================================
 		// CALLBACKS
@@ -109,7 +137,7 @@ namespace RedditImageScheduler {
 			if( dataEntries == null || dataEntries.Count == 0 ) {
 				dataNext = null;
 				StopTimer();
-				OnUpdate?.Invoke();
+				EventUpdate?.Invoke();
 				return;
 			}
 
@@ -124,7 +152,32 @@ namespace RedditImageScheduler {
 					if( entry.IsValid && !entry.IsPosted ) {
 						if( entry.Timestamp <= current && nLastPosting + postingSpacing <= current ) {
 							dataEntries.Consume(entry);
-							//todo: actually post
+							try {
+								//post to user profile for now
+								//TODO: implement proper subreddit selection
+								List<Subreddit> matches = redditClient.SubredditAutocompleteV2("u_" + redditUser.Name, true, true, true, 1);
+								if( matches.Count == 0 ) break;
+								Subreddit subreddit = matches[0];
+								FlairV2 flair = null;
+								if( subreddit.Flairs.LinkFlairV2.Count > 0 ) {
+									flair = subreddit.Flairs.LinkFlairV2[0];
+								}
+								LinkPost post = subreddit.LinkPost(entry.Title);
+								post.Author = redditUser.Name;
+								post.Title = entry.Title;
+								post.Subreddit = "u_" + redditUser.Name; 
+								post.URL = entry.Source;
+								post.NSFW = false; //TODO: implement NSFW setting
+								if( flair != null ) {
+									post.SetFlair(flair.Text, flair.FlairType);
+								}
+
+								//post.Submit();
+							}
+							catch( Exception ) {
+								EventError?.Invoke();
+								return;
+							}
 							nLastPosting = current;
 						}
 						else if( entry.Timestamp < timestamp ) {
@@ -137,7 +190,7 @@ namespace RedditImageScheduler {
 				dataEntries.Trim(ReddConfig.ENTRY_TRIMMING_DAYS_OLD);
 			}
 
-			OnUpdate?.Invoke();
+			EventUpdate?.Invoke();
 		}
 
 		private void OnTimer(object sender, ElapsedEventArgs e) {

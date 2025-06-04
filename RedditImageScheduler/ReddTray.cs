@@ -29,7 +29,7 @@ namespace RedditImageScheduler {
 			formTray.Menu.Items.Add(commandQuit);
 		}
 
-		public TrayIndicator UI => formTray;
+		public bool IsInitialized => formTray.Visible;
 
 		public void Initialize() {
 			Deinitialize();

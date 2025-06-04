@@ -66,11 +66,11 @@ namespace RedditImageScheduler.UI.Timetable {
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
-			reddScheduler.OnUpdate += OnUpdate;
+			reddScheduler.EventUpdate += OnUpdate;
 		}
 
 		protected override void OnUnLoad(EventArgs e) {
-			reddScheduler.OnUpdate -= OnUpdate;
+			reddScheduler.EventUpdate -= OnUpdate;
 			base.OnUnLoad(e);
 		}
 

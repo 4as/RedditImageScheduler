@@ -50,6 +50,7 @@ namespace RedditImageScheduler {
 				uiLogin.Show();
 			}
 
+			uiLogin.RedirectUrl = ioWeb.RedirectUrl;
 			uiLogin.StatusMode = status;
 		}
 
@@ -58,6 +59,8 @@ namespace RedditImageScheduler {
 				uiLogin.EventLogin -= OnLogin;
 				uiLogin.EventRegister -= OnRegister;
 				uiLogin.EventCancel -= OnCancel;
+				uiLogin.Close();
+				uiLogin = null;
 			}
 		}
 
@@ -74,7 +77,7 @@ namespace RedditImageScheduler {
 		}
 
 		private void OnSuccess() {
-			dataOptions.SetApp(uiLogin.AppId, uiLogin.AppSecret);
+			dataOptions.SetApp(uiLogin.AppId, uiLogin.AppSecret, ioWeb.AccessToken, ioWeb.RefreshToken);
 			ioWeb.Stop();
 			EventLogin?.Invoke();
 		}

@@ -72,7 +72,7 @@ namespace RedditImageScheduler.UI {
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
-			reddScheduler.OnUpdate += OnTick;
+			reddScheduler.EventUpdate += OnTick;
 			dataEntries.OnUpdate += OnUpdate;
 			etoEdit.Click += OnClickEdit;
 			uiTimeGrid.SelectedItemsChanged += OnSelection;
@@ -81,7 +81,7 @@ namespace RedditImageScheduler.UI {
 		}
 
 		protected override void OnUnLoad(EventArgs e) {
-			reddScheduler.OnUpdate -= OnTick;
+			reddScheduler.EventUpdate -= OnTick;
 			dataEntries.OnUpdate -= OnUpdate;
 			etoEdit.Click -= OnClickEdit;
 			uiTimeGrid.SelectedItemsChanged -= OnSelection;

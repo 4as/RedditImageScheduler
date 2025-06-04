@@ -17,4 +17,8 @@
       <EmbeddedResource Include="Resources\drop_icon.png" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Include="Resources\success.html" />
+    </ItemGroup>
+
 </Project>

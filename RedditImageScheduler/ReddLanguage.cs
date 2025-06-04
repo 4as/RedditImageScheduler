@@ -29,8 +29,9 @@ namespace RedditImageScheduler {
 		public static readonly string LABEL_ENTRY_SPACING = "Entry spacing:";
 		public static readonly string LABEL_POSTING_SPACING = "Posting overlap spacing:";
 		public static readonly string LABEL_TRIM_OLD = "History trim:";
-		public static readonly string LABEL_APP_ID = "App ID:";
+		public static readonly string LABEL_APP_ID = "App ID *:";
 		public static readonly string LABEL_APP_SECRET = "App secret:";
+		public static readonly string LABEL_APP_REDIRECT = "Redirect URL:";
 
 		public static readonly string MENU_LOGOUT = "&Log out";
 		public static readonly string MENU_LOAD = "&Open...";

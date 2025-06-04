@@ -57,7 +57,7 @@ namespace RedditImageScheduler.UI {
 			etoTimetable.Click += OnClickTimetable;
 			etoList.SelectedIndexChanged += OnSelect;
 			dataEntries.OnUpdate += OnUpdate;
-			reddScheduler.OnUpdate += OnTick;
+			reddScheduler.EventUpdate += OnTick;
 			OnUpdate();
 		}
 
@@ -67,7 +67,7 @@ namespace RedditImageScheduler.UI {
 			uiEntry.EventDelete -= OnRemove;
 			etoList.SelectedIndexChanged -= OnSelect;
 			dataEntries.OnUpdate -= OnUpdate;
-			reddScheduler.OnUpdate -= OnTick;
+			reddScheduler.EventUpdate -= OnTick;
 			base.OnUnLoad(e);
 		}
 

@@ -35,41 +35,35 @@ namespace RedditImageScheduler {
 			ioOptions.EventError += OnOptionsError;
 			ioOptions.Load();
 
-			reddLogin.EventLogin += OnLogin;
-			reddLogin.Initialize(ioOptions.Data);
-			
+			OnStart();
+
 			isRunning = true;
 		}
 
 		protected override void OnTerminating(CancelEventArgs e) {
-#if DEBUG
-			if( !isRunning ) return;
-			isRunning = false;
-#else
-			if( isRunning ) return;
-#endif
+			if( isRunning && reddTray.IsInitialized ) return;
 			
 			ioOptions.EventError -= OnOptionsError;
-			
-			ioDatabase.EventErrorInitialize -= OnDatabaseErrorInitialize;
-			ioDatabase.EventErrorChange -= OnDatabaseErrorChange;
-			ioDatabase.Close();
-			
-			reddTray.EventOpen -= OnOpen;
-			reddTray.EventQuit -= OnQuit;
-			reddTray.Dispose();
 
-			reddScheduler.Deinitialize();
+			OnClose();
+			reddTray.Dispose();
 			
 			base.OnTerminating(e);
 
 			Quit();
 		}
 
+		private void OnStart() {
+			if( ioOptions.HasApp ) {
+				OnLogin();
+			}
+			else {
+				reddLogin.EventLogin += OnLogin;
+				reddLogin.Initialize(ioOptions.Data);
+			}
+		}
+
 		private void OnLogin() {
-			reddLogin.EventLogin -= OnLogin;
-			reddLogin.Deinitialize();
-			
 			ioDatabase.EventErrorInitialize += OnDatabaseErrorInitialize;
 			ioDatabase.EventErrorChange += OnDatabaseErrorChange;
 			ioDatabase.Open(ioOptions.DatabasePath);
@@ -78,8 +72,13 @@ namespace RedditImageScheduler {
 			reddTray.EventQuit += OnQuit;
 			reddTray.Initialize();
 
+			reddScheduler.EventError += OnScheduleError;
 			reddScheduler.Initialize(ioDatabase.Entries);
+			
+			reddLogin.EventLogin -= OnLogin;
+			reddLogin.Deinitialize();
 		}
+
 
 		private void OnOpen() {
 			if( reddMain != null ) {
@@ -93,18 +92,44 @@ namespace RedditImageScheduler {
 
 			reddMain = new ReddMain(ioDatabase, reddScheduler, ioOptions.Data);
 			reddMain.Show();
-			reddMain.Closed += OnClose;
+			reddMain.Closed += OnClosing;
+			reddMain.EventLogout += OnLogout;
+		}
+		
+		private void OnClosing(object sender, EventArgs e) {
+			if( reddMain != null ) {
+				reddMain.Closed -= OnClosing;
+				reddMain.EventLogout -= OnLogout;
+				if( !reddMain.IsDisposed ) reddMain.Dispose();
+
+				reddMain = null;
+			}
 		}
 
-		private void OnClose(object sender, EventArgs e) {
-			reddMain.Closed -= OnClose;
-			if( !reddMain.IsDisposed ) reddMain.Dispose();
+		private void OnLogout() {
+			ioOptions.UnsetApp();
+			OnClose();
+			OnStart();
+		}
+
+		private void OnClose() {
+			OnClosing(null, null);
+
+			ioDatabase.EventErrorInitialize -= OnDatabaseErrorInitialize;
+			ioDatabase.EventErrorChange -= OnDatabaseErrorChange;
+			ioDatabase.Close();
 			
-			reddMain = null;
+			reddTray.EventOpen -= OnOpen;
+			reddTray.EventQuit -= OnQuit;
+			reddTray.Deinitialize();
+
+			reddScheduler.EventError -= OnScheduleError;
+			reddScheduler.Deinitialize();
 		}
 
 		private void OnQuit() {
 			if( reddMain != null && reddMain.HasChanges && !reddMain.ShowSaveWarning() ) return;
+			isRunning = false;
 			Application.Instance.Quit();
 		}
 		
@@ -118,6 +143,12 @@ namespace RedditImageScheduler {
 		
 		private void OnDatabaseErrorChange() {
 			MessageBox.Show(string.Format(ReddLanguage.ERROR_DATABASE_MODIFY_FAILED, ioDatabase.FilePath), MessageBoxType.Error); 
+		}
+		
+		
+		private void OnScheduleError() {
+			ioOptions.UnsetApp();
+			OnStart();
 		}
 	}
 }

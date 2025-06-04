@@ -63,6 +63,7 @@ namespace RedditImageScheduler {
 			base.OnShown(e);
 			uiEditor.EventTimetable += OnTimetable;
 			uiTimetable.EventEdit += OnEdit;
+			uiMenu.EventLogout += OnLogout;
 			uiMenu.EventQuit += OnQuit;
 			uiMenu.EventOptions += OnOptions;
 			uiMenu.EventSave += OnSave;
@@ -74,6 +75,7 @@ namespace RedditImageScheduler {
 			
 			uiEditor.EventTimetable -= OnTimetable;
 			uiTimetable.EventEdit -= OnEdit;
+			uiMenu.EventLogout -= OnLogout;
 			uiMenu.EventSave -= OnSave;
 			uiMenu.EventLoad -= OnLoad;
 			uiMenu.EventQuit -= OnQuit;
@@ -101,6 +103,11 @@ namespace RedditImageScheduler {
 					return false;
 			}
 		}
+
+		// ===============================================
+		// EVENTS
+		public delegate void MainEvent();
+		public event MainEvent EventLogout;
 
 		// ===============================================
 		// CALLBACKS
@@ -155,6 +162,11 @@ namespace RedditImageScheduler {
 				default:
 					return;
 			}
+		}
+		
+		private void OnLogout() {
+			if( HasChanges && !ShowSaveWarning() ) return;
+			EventLogout?.Invoke();
 		}
 
 		private void OnQuit() {

@@ -11,6 +11,8 @@ namespace RedditImageScheduler.IO {
 		private static readonly string PROP_DATABASE = nameof(DatabasePath);
 		private static readonly string PROP_APP_ID = nameof(AppId);
 		private static readonly string PROP_APP_SECRET = nameof(AppSecret);
+		private static readonly string PROP_ACCESS_TOKEN = nameof(AccessToken);
+		private static readonly string PROP_REFRESH_TOKEN = nameof(RefreshToken);
 		private static readonly string PROP_SPACING_HOURS = nameof(EntrySpacingHours);
 		private static readonly string PROP_POSTING_MINUTES = nameof(PostingSpacingMinutes);
 		private static readonly string PROP_TRIMMING_DAYS = nameof(TrimmingOldDays);
@@ -33,6 +35,8 @@ namespace RedditImageScheduler.IO {
 
 		private string sAppId;
 		private string sAppSecret;
+		private string sAccessToken;
+		private string sRefreshToken;
 
 		public ReddIOOptions(string filepath) {
 			sFilePath = filepath;
@@ -41,20 +45,41 @@ namespace RedditImageScheduler.IO {
 		
 		public ReddDataOptions Data => dataOptions;
 		public string FilePath => sFilePath;
+
+		public bool HasApp => !string.IsNullOrEmpty(sRefreshToken);
 		
 		public string AppId => sAppId;
 		public string AppSecret => sAppSecret;
+		public string AccessToken => sAccessToken;
+		public string RefreshToken => sRefreshToken;
 		public string DatabasePath => reddFilepath.Filepath;
 		public uint EntrySpacingHours => reddEntrySpacingHours.Value;
 		public uint PostingSpacingMinutes => reddPostingSpacingMinutes.Value;
 		public uint TrimmingOldDays => reddTrimmingOldDays.Value;
 
-		public void SetApp(string app_id, string app_secret) {
+		public void SetApp(string app_id, string app_secret, string access_token, string refresh_token) {
 			sAppId = app_id;
 			iniData[ReddConfig.SETTINGS_SECTION][PROP_APP_ID] = sAppId;
 			sAppSecret = app_secret;
 			iniData[ReddConfig.SETTINGS_SECTION][PROP_APP_SECRET] = sAppSecret;
+			sAccessToken = access_token;
+			iniData[ReddConfig.SETTINGS_SECTION][PROP_ACCESS_TOKEN] = sAccessToken;
+			sRefreshToken = refresh_token;
+			iniData[ReddConfig.SETTINGS_SECTION][PROP_REFRESH_TOKEN] = sRefreshToken;
 			Save();
+		}
+
+		public void UnsetApp() {
+			sAppId = null;
+			iniData[ReddConfig.SETTINGS_SECTION].Remove(PROP_APP_ID);
+			sAppSecret = null;
+			iniData[ReddConfig.SETTINGS_SECTION].Remove(PROP_APP_SECRET);
+			sAccessToken = null;
+			iniData[ReddConfig.SETTINGS_SECTION].Remove(PROP_ACCESS_TOKEN);
+			sRefreshToken = null;
+			iniData[ReddConfig.SETTINGS_SECTION].Remove(PROP_REFRESH_TOKEN);
+			Save();
+
 		}
 
 		public void SetDatabase(string database_path) {
@@ -97,6 +122,14 @@ namespace RedditImageScheduler.IO {
 
 				if( section.Contains(PROP_APP_SECRET) ) {
 					sAppSecret = section[PROP_APP_SECRET];
+				}
+				
+				if( section.Contains(PROP_ACCESS_TOKEN) ) {
+					sAccessToken = section[PROP_ACCESS_TOKEN];
+				}
+				
+				if( section.Contains(PROP_REFRESH_TOKEN) ) {
+					sRefreshToken = section[PROP_REFRESH_TOKEN];
 				}
 
 				if( section.Contains(PROP_DATABASE) ) {

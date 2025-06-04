@@ -8,6 +8,8 @@ namespace RedditImageScheduler.UI.Login {
 		private readonly TextBox etoId = new TextBox();
 		private readonly Label etoSecretLabel = new Label();
 		private readonly TextBox etoSecret = new TextBox();
+		private readonly Label etoRedirectLabel = new Label();
+		private readonly TextBox etoRedirect = new TextBox();
 		private readonly Button etoLogin = new Button();
 		private readonly Button etoRegister = new Button();
 		
@@ -31,7 +33,15 @@ namespace RedditImageScheduler.UI.Login {
 			login.Add(etoSecretLabel);
 			login.Add(etoSecret);
 			login.EndHorizontal();
-
+			
+			login.BeginHorizontal();
+			etoRedirectLabel.VerticalAlignment = VerticalAlignment.Center;
+			etoRedirectLabel.Text = ReddLanguage.LABEL_APP_REDIRECT;
+			login.Add(etoRedirectLabel);
+			etoRedirect.ReadOnly = true;
+			login.Add(etoRedirect);
+			login.EndHorizontal();
+			
 			login.EndVertical();
 			Add(login);
 
@@ -63,6 +73,11 @@ namespace RedditImageScheduler.UI.Login {
 		
 		public string AppId => etoId.Text;
 		public string AppSecret => etoSecret.Text;
+
+		public string RedirectUrl {
+			get => etoRedirect.Text;
+			set => etoRedirect.Text = value;
+		}
 
 		public event Action EventLogin;
 		public event Action EventRegister;

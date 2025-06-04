@@ -10,7 +10,7 @@ namespace RedditImageScheduler.UI {
 		public ReddUILogin() {
 			Title = ReddLanguage.NAME_LOGIN;
 			Resizable = false;
-			Size = new Size(400, 140);
+			Size = new Size(400, 146);
 			Content = uiLoginForm;
 			Padding = new Padding(2);
 		}
@@ -39,6 +39,11 @@ namespace RedditImageScheduler.UI {
 		
 		public string AppId => uiLoginForm.AppId;
 		public string AppSecret => uiLoginForm.AppSecret;
+		
+		public string RedirectUrl {
+			get => uiLoginForm.RedirectUrl;
+			set => uiLoginForm.RedirectUrl = value;
+		}
 
 		public delegate void UILoginEvent();
 		public event UILoginEvent EventLogin;

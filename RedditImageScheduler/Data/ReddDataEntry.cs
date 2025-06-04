@@ -14,15 +14,27 @@ namespace RedditImageScheduler.Data {
 		[Column(nameof(Timestamp))]
 		public long Timestamp { get; set; }
 
+		/// <summary>
+		/// Title of the post. 
+		/// </summary>
 		[Column(nameof(Title))]
 		public string Title { get; set; }
 
+		/// <summary>
+		/// URL of the post.
+		/// </summary>
 		[Column(nameof(Source))]
 		public string Source { get; set; }
 
+		/// <summary>
+		/// Raw image data of the post.
+		/// </summary>
 		[Column(nameof(Image))]
 		public byte[] Image { get; set; }
 		
+		/// <summary>
+		/// Has the post already been submitted?
+		/// </summary>
 		[Column(nameof(IsPosted))]
 		public bool IsPosted { get; set; }
 		

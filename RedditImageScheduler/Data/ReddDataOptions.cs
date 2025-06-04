@@ -9,6 +9,8 @@ namespace RedditImageScheduler.Data {
 		
 		public string AppId => ioSettings.AppId;
 		public string AppSecret => ioSettings.AppSecret;
+		public string AccessToken => ioSettings.AccessToken;
+		public string RefreshToken => ioSettings.RefreshToken;
 		
 		public string DatabasePath => ioSettings.DatabasePath;
 		
@@ -16,8 +18,12 @@ namespace RedditImageScheduler.Data {
 		public uint PostingSpacingMinutes => ioSettings.PostingSpacingMinutes;
 		public uint TrimmingOldDays => ioSettings.TrimmingOldDays;
 
-		public void SetApp(string app_id, string app_secret) {
-			ioSettings.SetApp(app_id, app_secret);
+		public void SetApp(string app_id, string app_secret, string access_token, string refresh_token) {
+			ioSettings.SetApp(app_id, app_secret, access_token, refresh_token);
+		}
+
+		public void UnsetApp() {
+			ioSettings.UnsetApp();
 		}
 
 		public void SetDatabase(string database_path) {
