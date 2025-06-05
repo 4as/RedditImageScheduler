@@ -29,7 +29,7 @@ namespace RedditImageScheduler {
 			formTray.Menu.Items.Add(commandQuit);
 		}
 
-		public bool IsInitialized => formTray.Visible;
+		public bool IsInitialized => !formTray.IsDisposed && formTray.Visible;
 
 		public void Initialize() {
 			Deinitialize();
@@ -41,10 +41,13 @@ namespace RedditImageScheduler {
 		}
 
 		public void Deinitialize() {
-			formTray.Visible = false;
+			if( !formTray.IsDisposed ) {
+				formTray.Visible = false;
+				formTray.Activated -= OnActivation;
+				formTray.Menu.Opening -= OnMenu;
+			}
+
 			commandOpen.Click -= OnActivation;
-			formTray.Activated -= OnActivation;
-			formTray.Menu.Opening -= OnMenu;
 			commandQuit.Click -= OnQuitting;
 		}
 
