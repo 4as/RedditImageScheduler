@@ -1,4 +1,3 @@
-
 # Reddit Image Scheduler
 
 Reddit Image Scheduler is currently **INCOMPLETE**, and can't post anything. The application has been created as an exercise, with hopes that perhaps one day Reddit will enable image posting through their API (which currently is not possible).
@@ -25,9 +24,10 @@ In its current state, Reddit Image Scheduler implements:
 
 To run the application, simply clone the repository and open the project in your favorite IDE. All required references should be downloaded as NuGet packages.
 
-Once the project is up and running, you'll be presented with the login form. Press **Register** to open a webpage where you can register your Reddit app. Or [click here](https://www.reddit.com/prefs/apps) in case the button doesn't do anything (for some reason). Select **installed app** and copy-paste the **redirect URI** from the RIS login UI. You can't change it later, so make sure to paste the right thing.
-
-On successful registration, you'll be assigned an **App ID**, which you can copy and paste into the login form. The **App secret** is not required and can be left empty.
+Once the project is up and running, you'll be presented with the login form. Press **Register** to open a webpage where you can register your Reddit app. Or [click here](https://www.reddit.com/prefs/apps) in case the button doesn't do anything (for some reason). Select **installed app** and copy-paste the **redirect URI** from the RIS login UI. You can't change it later, so make sure to paste the right thing.  
+![Login form](imgs/login_form.png)  
+![Reddit app](imgs/reddit_app.png)  
+On successful registration, you'll be assigned an **App ID**, which you can copy and paste into the login form. The **App secret** is not required and can be left empty.  
 
 Press **Connect** to try and grant access to the application - a new webpage should open where you can press **Allow**. If everything goes smoothly, you should see the login form close and the RIS icon appear in your tray. Either click it, or right-click it to open the context menu where you can select **Edit**. To permanently close the application, you have to right-click the tray icon and select **Quit**.
 
